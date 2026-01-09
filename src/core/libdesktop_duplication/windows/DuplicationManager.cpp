@@ -5,6 +5,8 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+#ifdef _WIN32
+
 #include "DuplicationManager.h"
 
 //
@@ -318,3 +320,5 @@ void DUPLICATIONMANAGER::GetOutputDesc(_Out_ DXGI_OUTPUT_DESC* DescPtr)
 {
     *DescPtr = m_OutputDesc;
 }
+
+#endif  //  #ifdef _WIN32

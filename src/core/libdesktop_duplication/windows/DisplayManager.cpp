@@ -5,6 +5,8 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+#ifdef _WIN32
+
 #include "DisplayManager.h"
 using namespace DirectX;
 
@@ -476,3 +478,6 @@ void DISPLAYMANAGER::CleanRefs()
         m_RTV = nullptr;
     }
 }
+
+
+#endif  //  #ifdef _WIN32

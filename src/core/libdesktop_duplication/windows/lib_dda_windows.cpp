@@ -1,3 +1,6 @@
+
+#ifdef _WIN32
+
 #include <limits.h>
 #include <string>
 #include <atomic>
@@ -536,3 +539,6 @@ LIBDESKDUPL_EXPORT void UnregisterDesktopChangeCalbakc(void)
 
 
 CPPUTILS_END_C
+
+
+#endif  //  #ifdef _WIN32

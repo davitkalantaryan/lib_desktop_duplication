@@ -5,6 +5,8 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+#ifdef _WIN32
+
 #include "ThreadManager.h"
 
 DWORD WINAPI DDProc(_In_ void* Param);
@@ -261,3 +263,6 @@ void THREADMANAGER::WaitForThreadTermination()
         WaitForMultipleObjectsEx(m_ThreadCount, m_ThreadHandles, TRUE, INFINITE, FALSE);
     }
 }
+
+
+#endif  //  #ifdef _WIN32

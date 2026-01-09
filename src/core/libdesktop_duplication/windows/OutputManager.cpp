@@ -5,6 +5,9 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+
+#ifdef _WIN32
+
 #include <algorithm>
 #include <vector>
 using std::min;
@@ -1153,4 +1156,4 @@ void OUTPUTMANAGER::SaveCurrentFrame(ID3D11Texture2D* sourceTexture)
     }
 }
 
-
+#endif  //  #ifdef _WIN32

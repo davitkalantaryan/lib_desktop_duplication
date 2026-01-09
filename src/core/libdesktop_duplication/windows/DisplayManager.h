@@ -5,6 +5,8 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+#ifdef _WIN32
+
 #ifndef _DISPLAYMANAGER_H_
 #define _DISPLAYMANAGER_H_
 
@@ -44,3 +46,5 @@ class DISPLAYMANAGER
 };
 
 #endif
+
+#endif  //  #ifdef _WIN32

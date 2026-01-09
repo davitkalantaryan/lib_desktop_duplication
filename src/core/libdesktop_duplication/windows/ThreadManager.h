@@ -5,6 +5,8 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+#ifdef _WIN32
+
 #ifndef _THREADMANAGER_H_
 #define _THREADMANAGER_H_
 
@@ -31,3 +33,5 @@ class THREADMANAGER
 };
 
 #endif
+
+#endif  //  #ifdef _WIN32

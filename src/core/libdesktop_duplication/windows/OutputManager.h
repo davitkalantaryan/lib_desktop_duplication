@@ -5,6 +5,8 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+#ifdef _WIN32
+
 #ifndef _OUTPUTMANAGER_H_
 #define _OUTPUTMANAGER_H_
 
@@ -69,4 +71,4 @@ class OUTPUTMANAGER
 
 #endif
 
-
+#endif  //  #ifdef _WIN32
