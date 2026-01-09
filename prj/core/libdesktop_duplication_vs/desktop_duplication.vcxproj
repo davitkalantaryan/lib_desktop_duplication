@@ -89,39 +89,43 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\libdeskdupl\deskdupl.h" />
     <ClInclude Include="..\..\..\include\libdeskdupl\export_symbols.h" />
-    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\CommonTypes.h" />
-    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\DisplayManager.h" />
-    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\DuplicationManager.h" />
-    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\OutputManager.h" />
-    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\ThreadManager.h" />
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\CommonTypes.h" />
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\DisplayManager.h" />
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\DuplicationManager.h" />
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\OutputManager.h" />
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\ThreadManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\DisplayManager.cpp" />
-    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\DuplicationManager.cpp" />
-    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\lib_dda_windows.cpp" />
-    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\OutputManager.cpp" />
-    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\ThreadManager.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\DisplayManager.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\DuplicationManager.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\lib_dda_windows.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\OutputManager.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\ThreadManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\PixelShader.hlsl">
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS</EntryPointName>
+    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\PixelShader.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS</EntryPointName>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)%(Filename).h</HeaderFileOutput>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)%(Filename).h</HeaderFileOutput>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0_level_9_1</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0_level_9_1</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\VertexShader.hlsl">
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS</EntryPointName>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0_level_9_1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ObjectFileOutput>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS</EntryPointName>
       <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\VertexShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0_level_9_1</ShaderModel>
       <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)%(Filename).h</HeaderFileOutput>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)%(Filename).h</HeaderFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ObjectFileOutput>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ObjectFileOutput>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

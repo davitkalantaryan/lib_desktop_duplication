@@ -21,47 +21,47 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\CommonTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\DisplayManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\DuplicationManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\OutputManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\ThreadManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\libdeskdupl\deskdupl.h">
       <Filter>Header Files\include\libdeskdupl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\libdeskdupl\export_symbols.h">
       <Filter>Header Files\include\libdeskdupl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\CommonTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\DisplayManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\DuplicationManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\OutputManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\ThreadManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\DisplayManager.cpp">
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\DisplayManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\DuplicationManager.cpp">
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\DuplicationManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\lib_dda_windows.cpp">
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\lib_dda_windows.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\OutputManager.cpp">
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\OutputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\ThreadManager.cpp">
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\ThreadManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\PixelShader.hlsl" />
-    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\VertexShader.hlsl" />
+    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\PixelShader.hlsl" />
+    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\VertexShader.hlsl" />
   </ItemGroup>
 </Project>
