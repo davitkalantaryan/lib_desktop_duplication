@@ -5,9 +5,9 @@
 // created by:		Davit Kalantaryan (davit.kalantaryan@desy.de)
 //
 
-#include <cinternal/internal_header.h>
+#include <libdeskdupl/export_symbols.h>
 
-#if !defined(_WIN32)
+#ifndef LIBDESKDUPL_HAS_DDAPI
 
 #include <libdeskdupl/deskdupl.h>
 #include <cinternal/signals.h>
@@ -206,4 +206,4 @@ static QPixmap GetScreenshotStatic(QRect* a_rectAll_p)
 }
 
 
-#endif  //  #if !defined(_WIN32)
+#endif  //  #ifndef LIBDESKDUPL_HAS_DDAPI

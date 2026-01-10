@@ -5,8 +5,10 @@
 // created by:		Davit Kalantaryan (davit.kalantaryan@desy.de)
 //
 
+
 #ifndef LIBDESKDUPL_INCLUDE_LIBDESKDUPL_EXPORT_SYMBOLS_H
 #define LIBDESKDUPL_INCLUDE_LIBDESKDUPL_EXPORT_SYMBOLS_H
+
 
 #include <cinternal/internal_header.h>
 
@@ -22,6 +24,11 @@
 #define LIBDESKDUPL_EXPORT CPPUTILS_DLL_PRIVATE
 #endif
 #endif
+
+
+#if defined(_WIN32)
+#define LIBDESKDUPL_HAS_DDAPI
+#endif  //  #if defined(_WIN32)
 
 
 #endif  // #ifndef LIBDESKDUPL_INCLUDE_LIBDESKDUPL_EXPORT_SYMBOLS_H

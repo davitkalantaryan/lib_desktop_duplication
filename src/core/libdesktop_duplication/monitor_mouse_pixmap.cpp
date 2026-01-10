@@ -6,7 +6,9 @@
 // created by:		Davit Kalantaryan (davit.kalantaryan@desy.de)
 //
 
-#include <cinternal/internal_header.h>
+#include <libdeskdupl/export_symbols.h>
+
+#ifndef LIBDESKDUPL_HAS_DDAPI
 
 #if defined(FOCUST_P01_MON_USE_PRIVATE_APP) || !defined(CPPUTILS_OS_MACOS)
 
@@ -290,3 +292,5 @@ static QImage XCursorImageToQImage(MonImageRef xCursorImage) {
 #endif  //  #ifdef _WIN32
 
 #endif  //  #ifndef CPPUTILS_OS_MACOS
+
+#endif  //  #ifndef LIBDESKDUPL_HAS_DDAPI
