@@ -59,9 +59,21 @@
     <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\ThreadManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\desktop_duplication_common.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\monitor_mouse_pixmap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\contrib\cinternal\src\core\cinternal_core_logger.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\PixelShader.hlsl" />
     <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\VertexShader.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\core\libdesktop_duplication\monitor_mouse_pixmap_apple.mm" />
   </ItemGroup>
 </Project>

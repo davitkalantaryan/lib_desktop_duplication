@@ -6,14 +6,15 @@
 //
 
 #include <libdeskdupl/deskdupl.h>
-#include <cinternal/signals.h>
+#include <QGuiApplication>
 #include <QString>
 #include <QImage>
 #include <QDir>
+#include <QFileInfo>
 
 // Define a simple struct to hold our saving state if needed
 struct CallbackData {
-    std::string OutputDirectory;
+    QDir OutputDirectory;
     int FrameCount;
 };
 
@@ -24,51 +25,40 @@ void FrameCallback(void* userData, const void* a_img)
     if (!userData || !img) return;
     CallbackData* data = (CallbackData*)userData;
 
-    // Ensure directory exists (basic check, optimized to not do it every frame if possible in real apps, 
-    // but for this test consistent with original logic)
-    static bool dirChecked = false;
-    QString dirPath = QString::fromStdString(data->OutputDirectory);
-    if (!dirChecked)
-    {
-        QDir dir(dirPath);
-        if (!dir.exists()) {
-            dir.mkpath(".");
-        }
-        dirChecked = true;
-    }
-
     // Save
-    QString filename = QString("%1/frame_%2.png")
-        .arg(dirPath)
-        .arg(data->FrameCount, 6, 10, QChar('0'));
+    const QString fileName = QString("frame_%1.png").arg(data->FrameCount, 6, 10, QChar('0'));
+    const QString filePath = QFileInfo(data->OutputDirectory, fileName).filePath();
 
-    img->save(filename, "PNG");
+    img->save(filePath, "PNG");
     data->FrameCount++;
 }
 
 
 int main(int a_argc, char* a_argv[])
 {
+    QGuiApplication app(a_argc, a_argv);
+
     // Prepare User Data
     CallbackData cbData;
-    cbData.OutputDirectory = "./out";
+    cbData.OutputDirectory = QFileInfo(QFileInfo(a_argv[0]).dir(),"out").filePath();
     cbData.FrameCount = 0;
+
+    if (!cbData.OutputDirectory.exists()) {
+        cbData.OutputDirectory.mkpath(".");
+        if (!cbData.OutputDirectory.exists()) {
+            return 1;
+        }
+    }
 
     // Register Callbacks
     int result = RegisterAndStartDesktopChangeCalbakc(&cbData, FrameCallback);
     if (result != 0)
     {
         //MessageBoxA(nullptr, "Failed to register callback", "Error", MB_OK);
-        return -1;
+        return 1;
     }
 
-    // Wait Loop as requested
-    while (1)
-    {
-        CinternalSleepInterruptableMs(10);
-        // In a real app we might look for a quit signal or key press
-        // For this test, user said they will terminate via Task Manager
-    }
+    QCoreApplication::exec();
 
     // Unregister (Unreachable in infinite loop but good practice)
     UnregisterDesktopChangeCalbakc();
