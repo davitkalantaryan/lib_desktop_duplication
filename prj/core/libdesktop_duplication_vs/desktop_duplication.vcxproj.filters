@@ -65,7 +65,7 @@
     <ClCompile Include="..\..\..\src\core\libdesktop_duplication\monitor_mouse_pixmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\contrib\cinternal\src\core\cinternal_core_logger.c">
+    <ClCompile Include="..\..\..\contrib\qtutils\contrib\emsutils\contrib\cinternal\src\core\cinternal_core_logger.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

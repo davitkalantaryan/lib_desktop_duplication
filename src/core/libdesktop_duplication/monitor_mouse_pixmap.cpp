@@ -53,8 +53,12 @@ LIBDESKDUPL_EXPORT int DeskDuplGetMouseQImage(void* CPPUTILS_ARG_NN a_qtImageBuf
 {
     CURSORINFO ci{};
     ci.cbSize = sizeof(CURSORINFO);
-    if (!GetCursorInfo(&ci)) return QImage();
-    if (!(ci.flags & CURSOR_SHOWING) || !ci.hCursor) return QImage();
+    if (!GetCursorInfo(&ci)) {
+        return 1;
+    }
+    if (!(ci.flags & CURSOR_SHOWING) || !ci.hCursor) {
+        return 1;
+    }
 
     HCURSOR hCursor = ci.hCursor;
 
@@ -155,14 +159,15 @@ LIBDESKDUPL_EXPORT int DeskDuplGetMouseQImage(void* CPPUTILS_ARG_NN a_qtImageBuf
     const qreal x = (ci.ptScreenPos.x - hot.x) * inv;
     const qreal y = (ci.ptScreenPos.y - hot.y) * inv;
     if(a_pCursorPos){
-        *a_pCursorPos = QPoint(qFloor(x + 0.5), qFloor(y + 0.5)); // center-round
+        QPoint* const pCursorPos = (QPoint*)a_pCursorPos;
+        *pCursorPos = QPoint(qFloor(x + 0.5), qFloor(y + 0.5)); // center-round
     }
 
     // Scale the image to Qt logical so drawImage uses same coord space
     if (scale != 1.0) {
-        const QSize target(qMax(1, int(qRound(out.width()  * inv))),
-                           qMax(1, int(qRound(out.height() * inv))));
-        out = out.scaled(target, Qt::IgnoreAspectRatio, Qt::FastTransformation); // crisp
+        const QSize target(qMax(1, int(qRound(qtImageBuffer->width()  * inv))),
+                           qMax(1, int(qRound(qtImageBuffer->height() * inv))));
+        *qtImageBuffer = qtImageBuffer->scaled(target, Qt::IgnoreAspectRatio, Qt::FastTransformation); // crisp
     }
 
     return 0;
