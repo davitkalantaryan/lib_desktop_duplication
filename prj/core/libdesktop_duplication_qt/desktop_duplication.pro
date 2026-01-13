@@ -16,6 +16,16 @@ win32 {
 
     #LIBS += -lWtsapi32
     #LIBS += -lUser32
+    # Import a .props file
+    #QMAKE_EXTRA_TARGETS += import_props
+
+    # For MSVC, use the /p option to pass properties
+    #QMAKE_CXXFLAGS += /p:ForceImportBeforeCppTargets="$${libDeskDuplRepoRoot}/prj/common/common_vs/libdeskdupl_hlslconfig.props"
+
+    # Alternative: Use QMAKE_LFLAGS for linker properties
+    #QMAKE_LFLAGS += /p:ForceImportAfterCppTargets="$${libDeskDuplRepoRoot}/prj/common/common_vs/libdeskdupl_hlslconfig.props"
+
+    HLSL_PROPS_FILE = $${libDeskDuplRepoRoot}/prj/common/common_vs/libdeskdupl_hlslconfig.props
 
 } else:linux {
 

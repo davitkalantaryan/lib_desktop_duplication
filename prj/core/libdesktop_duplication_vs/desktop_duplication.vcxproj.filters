@@ -70,10 +70,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\PixelShader.hlsl" />
-    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\VertexShader.hlsl" />
+    <None Include="..\..\..\src\core\libdesktop_duplication\monitor_mouse_pixmap_apple.mm" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\src\core\libdesktop_duplication\monitor_mouse_pixmap_apple.mm" />
+    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\PixelShader.hlsl" />
+    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\VertexShader.hlsl" />
   </ItemGroup>
 </Project>

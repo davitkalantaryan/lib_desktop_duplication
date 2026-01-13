@@ -89,3 +89,4 @@ prj/tests/googletest_mult/Makefile.googletest_getter
 /.private
 
 *.cpp.autosave
+/hlsls_out
