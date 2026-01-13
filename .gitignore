@@ -90,3 +90,5 @@ prj/tests/googletest_mult/Makefile.googletest_getter
 
 *.cpp.autosave
 /hlsls_out
+.DS_Store
+
