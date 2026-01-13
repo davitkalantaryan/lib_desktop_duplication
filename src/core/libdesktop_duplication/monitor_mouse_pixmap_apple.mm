@@ -22,7 +22,7 @@ namespace focust { namespace monitor { namespace globals{
 
 
 // Function to get the current cursor pixmap and position on macOS
-CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCursorPos)
+LIBDESKDUPL_EXPORT int DeskDuplGetMouseQImage(void* CPPUTILS_ARG_NN a_qtImageBuffer, void* a_pCursorPos)
 {
     @autoreleasepool {
         // Get current global cursor position

@@ -27,8 +27,12 @@ isEmpty(libDeskDuplFlagsAndSysCommonIncluded){
 
     INCLUDEPATH += $${libDeskDuplRepoRoot}/include
 
-    LIBS	+= -L$${libDeskDuplRepoRoot}/sys/$${CODENAME}/$$CONFIGURATION/lib
-    LIBS	+= -L$${libDeskDuplRepoRoot}/sys/$${CODENAME}/$$CONFIGURATION/tlib
+    exists($${libDeskDuplRepoRoot}/sys/$${CODENAME}/$$CONFIGURATION/lib) {
+        LIBS += -L$${libDeskDuplRepoRoot}/sys/$${CODENAME}/$$CONFIGURATION/lib
+    }
+    exists($${libDeskDuplRepoRoot}/sys/$${CODENAME}/$$CONFIGURATION/tlib) {
+        LIBS += -L$${libDeskDuplRepoRoot}/sys/$${CODENAME}/$$CONFIGURATION/tlib
+    }
 
     OTHER_FILES += $$files($${PWD}/../common_mkfl/*.Makefile,true)
 }

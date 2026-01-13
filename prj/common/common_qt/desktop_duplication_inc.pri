@@ -33,6 +33,9 @@ win32 {
 
 }
 
+
+OBJECTIVE_SOURCES += $$files($${libDeskDuplRepoRoot}/src/core/libdesktop_duplication/*.mm,true)
+
 SOURCES += $$files($${libDeskDuplRepoRoot}/src/core/libdesktop_duplication/*.c,true)
 SOURCES += $$files($${libDeskDuplRepoRoot}/src/core/libdesktop_duplication/*.cpp,true)
 
