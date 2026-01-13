@@ -16,9 +16,13 @@
 #define NOMINMAX
 #endif
 
+#include <cinternal/logger.h>
 #include <cinternal/disable_compiler_warnings.h>
+#include <qtutils/disable_utils_warnings.h>
 #include <QScreen>
 #include <QGuiApplication>
+#include <QImage>
+#include <QPoint>
 #ifdef _WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -35,8 +39,6 @@ typedef XFixesCursorImage* MonImageRef;
 #else
 #error this platform is not supported
 #endif
-#include <QImage>
-#include <QPoint>
 #include <cinternal/undisable_compiler_warnings.h>
 
 
@@ -202,7 +204,7 @@ CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCur
 {
     Display* display = XOpenDisplay(NULL);
     if (!display) {
-        QtUtilsWarning() << "Unable to open X display.";
+        CInternalLogWarning("Unable to open X display.");
         return QImage();
     }
 
@@ -221,7 +223,7 @@ CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCur
     // Step 2: Get the cursor image using XFixesGetCursorImage
     XFixesCursorImage* xCursorImage = XFixesGetCursorImage(display);
     if (!xCursorImage) {
-        QtUtilsWarning() << "Unable to get cursor image.";
+        CInternalLogWarning("Unable to get cursor image.");
         XCloseDisplay(display);
         return QImage();
     }

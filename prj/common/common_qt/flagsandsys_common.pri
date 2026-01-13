@@ -23,7 +23,7 @@ isEmpty(libDeskDuplFlagsAndSysCommonIncluded){
         }
     }
 
-    include("$${libDeskDuplRepoRoot}/contrib/cinternal/prj/common/common_qt/flagsandsys_common.pri")
+    include("$${libDeskDuplRepoRoot}/contrib/qtutils/prj/common/common_qt/flagsandsys_common.pri")
 
     INCLUDEPATH += $${libDeskDuplRepoRoot}/include
 
