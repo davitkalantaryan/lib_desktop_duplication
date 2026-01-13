@@ -404,6 +404,8 @@ DUPL_RETURN OUTPUTMANAGER::UpdateApplicationWindow(_In_ PTR_INFO* PointerInfo, _
         return ProcessFailure(m_Device, L"Failed to acquire Keyed mutex in OUTPUTMANAGER", L"Error", hr, SystemTransitionsExpectedErrors);
     }
 
+    (void)Occluded;
+
     // Got mutex, so draw
     DUPL_RETURN Ret = DrawFrame();
     if (Ret == DUPL_RETURN_SUCCESS)

@@ -14,18 +14,19 @@ DEFINES += LIBDESKDUPL_COMPILING_SHARED_LIB
 
 win32 {
 
-    #LIBS += -lWtsapi32
-    #LIBS += -lUser32
-    # Import a .props file
-    #QMAKE_EXTRA_TARGETS += import_props
+    contains(QMAKE_TARGET.arch, x86_64) {
+        CODENAMEBASE = x64
+    } else {
+        CODENAMEBASE = unknown
+    }
 
-    # For MSVC, use the /p option to pass properties
-    #QMAKE_CXXFLAGS += /p:ForceImportBeforeCppTargets="$${libDeskDuplRepoRoot}/prj/common/common_vs/libdeskdupl_hlslconfig.props"
-
-    # Alternative: Use QMAKE_LFLAGS for linker properties
-    #QMAKE_LFLAGS += /p:ForceImportAfterCppTargets="$${libDeskDuplRepoRoot}/prj/common/common_vs/libdeskdupl_hlslconfig.props"
-
-    HLSL_PROPS_FILE = $${libDeskDuplRepoRoot}/prj/common/common_vs/libdeskdupl_hlslconfig.props
+    vs_common_dir = $${libDeskDuplRepoRoot}/prj/common/common_vs
+    varEq=$$system(call msbuild  /p:Configuration=$${CONFIGURATION} /p:Platform=$${CODENAMEBASE}  $${vs_common_dir}\build_hlsl.vcxproj)
+    INCLUDEPATH += $${libDeskDuplRepoRoot}/hlsls_out
+    # d3d11.lib;dxgi.lib;Gdi32.lib;User32.lib
+    LIBS += -ld3d11
+    LIBS += -lGdi32
+    LIBS += -lUser32
 
 } else:linux {
 

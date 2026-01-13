@@ -102,6 +102,8 @@ void DisplayMsg(_In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr)
 {
     // Simplified logging/error handling for library
     // For now, suppress message boxes or log to debug output
+    (void)Title;
+    (void)hr;
     OutputDebugStringW(Str);
 }
 
