@@ -5,11 +5,8 @@
 # created by:	D. Kalantaryan (davit.kalantaryan@gmail.com)  
 #  
 
-TEMPLATE = lib
 message("!!! $${_PRO_FILE_}")
 include ( "$${PWD}/../../common/common_qt/desktop_duplication_inc.pri" )
-include ( "$${cinternalRepoRoot}/prj/common/common_qt/core_lib_flags.pri" )
 
-DEFINES += LIBDESKDUPL_COMPILING_SHARED_LIB
-
+SOURCES += $${libDeskDuplRepoRoot}/src/tests/main_deskdupl_test01.cpp
 SOURCES += $${cinternalRepoRoot}/src/core/cinternal_core_logger.c
