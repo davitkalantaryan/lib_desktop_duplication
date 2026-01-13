@@ -50,18 +50,27 @@ int main(int a_argc, char* a_argv[])
         }
     }
 
+    QImage instBuff;
+    if(!DeskDuplGetCurrentScreen(&instBuff,false,nullptr,nullptr)){
+        FrameCallback(&cbData,&instBuff);
+    }
+
     // Register Callbacks
-    int result = RegisterAndStartDesktopChangeCalbakc(&cbData, FrameCallback);
+    int result = DeskDuplRegisterAndStartDesktopChangeCalbakc(&cbData, FrameCallback);
     if (result != 0)
     {
         //MessageBoxA(nullptr, "Failed to register callback", "Error", MB_OK);
         return 1;
     }
 
+    if(!DeskDuplGetCurrentScreen(&instBuff,false,nullptr,nullptr)){
+        FrameCallback(&cbData,&instBuff);
+    }
+
     QCoreApplication::exec();
 
     // Unregister (Unreachable in infinite loop but good practice)
-    UnregisterDesktopChangeCalbakc();
+    DeskDuplUnregisterDesktopChangeCalbakc();
 
     return 0;
 }

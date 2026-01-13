@@ -15,6 +15,7 @@
 #include <QCoreApplication>
 #include <QScreen>
 #include <QPainter>
+#include <QThread>
 #include <cinternal/undisable_compiler_warnings.h>
 
 
@@ -27,20 +28,21 @@ static QPixmap GetScreenshotStatic(QRect* a_rectAll_p, QPoint* a_cursorPos_p);
 CPPUTILS_BEGIN_C
 
 
-LIBDESKDUPL_EXPORT int DeskDuplGetCurrentScreen(void* CPPUTILS_ARG_NN a_qtImageBuffer, void* a_rectAll_p, void* a_pCursorPos)
+LIBDESKDUPL_EXPORT int DeskDuplGetCurrentScreen(void* CPPUTILS_ARG_NN a_qtImageBuffer, bool a_bForceInstant, void* a_rectAll_p, void* a_pCursorPos)
 {
     QImage* const qtImageBuffer = (QImage*)a_qtImageBuffer;
-    bool bHasData = false;
-    if(gp_screenImageFromDupl_p){
-        ::std::lock_guard< ::std::mutex > aGuard(gp_mutexForLastScreenImage);
+    if(!a_bForceInstant){
+        bool bHasData = false;
         if(gp_screenImageFromDupl_p){
-            *qtImageBuffer = *gp_screenImageFromDupl_p;
-            bHasData = true;
-        }  //  if(gp_screenImageFromDupl_p){  --  2
-    }  //  if(gp_screenImageFromDupl_p){  --  1
-
-    if(bHasData){
-        return 0;
+            ::std::lock_guard< ::std::mutex > aGuard(gp_mutexForLastScreenImage);
+            if(gp_screenImageFromDupl_p){
+                *qtImageBuffer = *gp_screenImageFromDupl_p;
+                bHasData = true;
+            }  //  if(gp_screenImageFromDupl_p){  --  2
+        }  //  if(gp_screenImageFromDupl_p){  --  1
+        if(bHasData){
+            return 0;
+        }
     }
 
     QRect* const rectAll_p = (QRect*)a_rectAll_p;
@@ -87,39 +89,50 @@ static inline QPixmap ConcatenatePixmaps(
 }
 
 
+static inline QList<SPixAndRect> GetScreenshotInsideThreadInline(void) noexcept {
+    QList<SPixAndRect> allPixmaps;
+    try {
+        QScreen* pScreen;
+        const QList<QScreen*> allScreens = QGuiApplication::screens();
+        const qsizetype screensCount = allScreens.size();
+        for (qsizetype i(0); i < screensCount; ++i) {
+            pScreen = allScreens.at(i);
+            if (pScreen) {
+                QPixmap pxMp = pScreen->grabWindow(0);
+                if (!pxMp.isNull()) {
+                    allPixmaps.push_back({ pScreen->geometry(),::std::move(pxMp) });
+                }
+            }  //  if(pScreen){
+        }  //  for(i=0; i<screensCount;++i){
+    }
+    catch (const ::std::bad_alloc& a_exc)
+    {
+        (void)a_exc;
+        //CInternalLogCritical("bad alloc exception what: \"%s\"",excpWhat);
+    }
+    catch (...) {
+        CInternalLogCritical("Unknown exception accured");
+    }
+    return allPixmaps;
+}
+
+
 static QPixmap GetScreenshotStatic(QRect* a_rectAll_p, QPoint* a_cursorPos_p)
 {
     QRect aRectAll;
     QPixmap aPixMapAll;
-
-    //const QList<QScreen*> allScreens = QGuiApplication::screens();
-    //const qsizetype screensCount = allScreens.size();
-    // instead of above code let's have following
     QList<SPixAndRect> allPixmaps;
-    QMetaObject::invokeMethod(qApp, [&allPixmaps]() {
-        try {
-            QScreen* pScreen;
-            const QList<QScreen*> allScreens = QGuiApplication::screens();
-            const qsizetype screensCount = allScreens.size();
-            for (qsizetype i(0); i < screensCount; ++i) {
-                pScreen = allScreens.at(i);
-                if (pScreen) {
-                    QPixmap pxMp = pScreen->grabWindow(0);
-                    if (!pxMp.isNull()) {
-                        allPixmaps.push_back({ pScreen->geometry(),::std::move(pxMp) });
-                    }
-                }  //  if(pScreen){
-            }  //  for(i=0; i<screensCount;++i){
-        }
-        catch (const ::std::bad_alloc& a_exc)
-        {
-            (void)a_exc;
-            //CInternalLogCritical("bad alloc exception what: \"%s\"",excpWhat);
-        }
-        catch (...) {
-            CInternalLogCritical("Unknown exception accured");
-        }
-    }, Qt::BlockingQueuedConnection);
+    QGuiApplication* const pThisApp = qApp;
+
+    if(pThisApp && (pThisApp->thread()!=QThread::currentThread())){
+        QMetaObject::invokeMethod(qApp, [&allPixmaps]() {
+            allPixmaps = GetScreenshotInsideThreadInline();
+        }, Qt::BlockingQueuedConnection);
+    }
+    else{
+        allPixmaps = GetScreenshotInsideThreadInline();
+    }
+
     const qsizetype screensCount = allPixmaps.size();
 
     if (screensCount) {

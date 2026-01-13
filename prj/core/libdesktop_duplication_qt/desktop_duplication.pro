@@ -21,6 +21,8 @@ win32 {
 
     QMAKE_LFLAGS_RPATH=
     QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN\'"
+    LIBS += -lXfixes
+    LIBS += -lX11
 
 }
 

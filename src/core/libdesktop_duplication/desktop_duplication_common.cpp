@@ -93,7 +93,7 @@ static void MakeScreenshotsAndCallCallback(void)
 {
     if (s_clbk) {
         QImage img;
-        if(!DeskDuplGetCurrentScreen(&img,nullptr,nullptr)){
+        if(!DeskDuplGetCurrentScreen(&img,true,nullptr,nullptr)){
 
             {  //  lock start
                 ::std::lock_guard<::std::mutex> aGuard(gp_mutexForLastScreenImage);
@@ -101,7 +101,7 @@ static void MakeScreenshotsAndCallCallback(void)
             }  //  lock end
 
             (*s_clbk)(s_userData, &img);
-        }  //  if(!DeskDuplGetCurrentScreen(&img,nullptr,nullptr)){
+        }  //  if(!DeskDuplGetCurrentScreen(&img,true,nullptr,nullptr)){
     }  //  if (s_clbk) {
 }
 
