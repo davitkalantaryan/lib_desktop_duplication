@@ -480,7 +480,7 @@ unsigned int __stdcall WrapperProc(void* data)
 
 CPPUTILS_BEGIN_C
 
-LIBDESKDUPL_EXPORT int RegisterAndStartDesktopChangeCalbakc(void* a_userData, TypeDesktopChange a_clbk)
+LIBDESKDUPL_EXPORT int DeskDuplRegisterAndStartDesktopChangeCalbakc(void* a_userData, TypeDesktopChange a_clbk)
 {
     if (WrapperThreadHandle != nullptr)
     {
@@ -513,7 +513,8 @@ LIBDESKDUPL_EXPORT int RegisterAndStartDesktopChangeCalbakc(void* a_userData, Ty
     return 0;
 }
 
-LIBDESKDUPL_EXPORT void UnregisterDesktopChangeCalbakc(void)
+
+LIBDESKDUPL_EXPORT void DeskDuplUnregisterDesktopChangeCalbakc(void)
 {
     if (WrapperThreadHandle)
     {

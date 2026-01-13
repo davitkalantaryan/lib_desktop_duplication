@@ -8,8 +8,6 @@
 
 #include <libdeskdupl/export_symbols.h>
 
-#ifndef LIBDESKDUPL_HAS_DDAPI
-
 #if defined(FOCUST_P01_MON_USE_PRIVATE_APP) || !defined(CPPUTILS_OS_MACOS)
 
 #ifndef NOMINMAX
@@ -46,14 +44,13 @@ typedef XFixesCursorImage* MonImageRef;
 static QImage XCursorImageToQImage(MonImageRef hBitmap);
 #endif
 
+CPPUTILS_BEGIN_C
 
 #ifdef _WIN32
 
 // Function to get the current cursor pixmap and position
-CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCursorPos)
+LIBDESKDUPL_EXPORT int DeskDuplGetMouseQImage(void* CPPUTILS_ARG_NN a_qtImageBuffer, void* a_pCursorPos)
 {
-    if (!a_pCursorPos) return QImage();
-
     CURSORINFO ci{};
     ci.cbSize = sizeof(CURSORINFO);
     if (!GetCursorInfo(&ci)) return QImage();
@@ -63,7 +60,9 @@ CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCur
 
     // --- Get size + hotspot ---
     ICONINFO ii{};
-    if (!GetIconInfo(hCursor, &ii)) return QImage();
+    if (!GetIconInfo(hCursor, &ii)){
+        return 1;
+    }
 
     // Compute logical cursor size (mask-only cursors store AND+XOR stacked)
     int w = 0, h = 0;
@@ -89,7 +88,7 @@ CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCur
     if (!screenDC) {
         if (ii.hbmColor) DeleteObject(ii.hbmColor);
         if (ii.hbmMask)  DeleteObject(ii.hbmMask);
-        return QImage();
+        return 1;
     }
 
     HBITMAP dib  = CreateDIBSection(screenDC, &bi, DIB_RGB_COLORS, &bits, nullptr, 0);
@@ -104,7 +103,8 @@ CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCur
 
     // Wrap DIB memory into QImage, then detach so we can free the DIB
     QImage img(reinterpret_cast<uchar*>(bits), w, h, QImage::Format_ARGB32_Premultiplied);
-    QImage out = img.copy();
+    QImage* const qtImageBuffer = (QImage*)a_qtImageBuffer;
+    *qtImageBuffer = img.copy();
     DeleteObject(dib);
 
     // Cleanup ICONINFO allocations
@@ -154,7 +154,9 @@ CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCur
     const qreal inv = 1.0 / scale;
     const qreal x = (ci.ptScreenPos.x - hot.x) * inv;
     const qreal y = (ci.ptScreenPos.y - hot.y) * inv;
-    *a_pCursorPos = QPoint(qFloor(x + 0.5), qFloor(y + 0.5)); // center-round
+    if(a_pCursorPos){
+        *a_pCursorPos = QPoint(qFloor(x + 0.5), qFloor(y + 0.5)); // center-round
+    }
 
     // Scale the image to Qt logical so drawImage uses same coord space
     if (scale != 1.0) {
@@ -163,25 +165,25 @@ CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCur
         out = out.scaled(target, Qt::IgnoreAspectRatio, Qt::FastTransformation); // crisp
     }
 
-    return out;
+    return 0;
 }
 
 
 #elif defined(Q_OS_MACOS)
 
 // Function to get the current cursor pixmap and position on macOS
-CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCursorPos)
+LIBDESKDUPL_EXPORT int DeskDuplGetMouseQImage(void* CPPUTILS_ARG_NN a_qtImageBuffer, void* a_pCursorPos)
 {
     CGImageRef cursorImage = CGSGetCursorImage();
     if (!cursorImage) {
-        return QImage();
+        return 1;
     }
 
     // Create a dummy event to get current mouse location
     CGEventRef event = CGEventCreate(NULL);
     if (!event) {
         CGImageRelease(cursorImage);
-        return QImage();
+        return 1;
     }
 
     CGPoint mouseLocation = CGEventGetLocation(event);
@@ -191,21 +193,22 @@ CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCur
         *a_pCursorPos = QPoint(static_cast<int>(mouseLocation.x), static_cast<int>(mouseLocation.y));
     }
 
-    QImage img = XCursorImageToQImage(cursorImage);
+    QImage* const qtImageBuffer = (QImage*)a_qtImageBuffer;
+    *qtImageBuffer = XCursorImageToQImage(cursorImage);
     CGImageRelease(cursorImage);
-    return img;
+    return 0;
 }
 
 
 #elif defined(Q_OS_LINUX)
 
 // Function to get the current cursor pixmap and position on Linux (X11)
-CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCursorPos)
+LIBDESKDUPL_EXPORT int DeskDuplGetMouseQImage(void* CPPUTILS_ARG_NN a_qtImageBuffer, void* a_pCursorPos)
 {
     Display* display = XOpenDisplay(NULL);
     if (!display) {
         CInternalLogWarning("Unable to open X display.");
-        return QImage();
+        return 1;
     }
 
     // Step 1: Get the root window and cursor position using XQueryPointer
@@ -217,7 +220,8 @@ CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCur
 
     // Set the cursor position if a valid pointer is provided
     if (a_pCursorPos) {
-        *a_pCursorPos = QPoint(rootX, rootY);
+        QPoint* const pCursorPos = (QPoint*)a_pCursorPos;
+        *pCursorPos = QPoint(rootX, rootY);
     }
 
     // Step 2: Get the cursor image using XFixesGetCursorImage
@@ -225,11 +229,12 @@ CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCur
     if (!xCursorImage) {
         CInternalLogWarning("Unable to get cursor image.");
         XCloseDisplay(display);
-        return QImage();
+        return 1;
     }
 
     // Step 3: Convert the XFixesCursorImage to QImage
-    QImage pixmap = XCursorImageToQImage(xCursorImage);
+    QImage* const qtImageBuffer = (QImage*)a_qtImageBuffer;
+    *qtImageBuffer = XCursorImageToQImage(xCursorImage);
 
     // Step 4: Free the XFixesCursorImage data
     XFree(xCursorImage);
@@ -237,11 +242,13 @@ CPPUTILS_DLL_PRIVATE QImage GetMouseQImagePrivate(QPoint* CPPUTILS_ARG_NN a_pCur
     // Close the X display connection
     XCloseDisplay(display);
 
-    return pixmap;
+    return 0;
 }
 
 #endif  //  #ifdef _WIN32
 
+
+CPPUTILS_END_C
 
 
 #ifdef _WIN32
@@ -293,6 +300,5 @@ static QImage XCursorImageToQImage(MonImageRef xCursorImage) {
 
 #endif  //  #ifdef _WIN32
 
-#endif  //  #ifndef CPPUTILS_OS_MACOS
+#endif  //  #if defined(FOCUST_P01_MON_USE_PRIVATE_APP) || !defined(CPPUTILS_OS_MACOS)
 
-#endif  //  #ifndef LIBDESKDUPL_HAS_DDAPI

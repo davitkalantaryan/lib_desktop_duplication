@@ -13,10 +13,12 @@
 CPPUTILS_BEGIN_C
 
 
-typedef void (*TypeDesktopChange)(void*,const void*);
+typedef void (*TypeDesktopChange)(void* usrData,const void* qtImage);
 
-LIBDESKDUPL_EXPORT int RegisterAndStartDesktopChangeCalbakc(void* a_userData, TypeDesktopChange a_clbk);
-LIBDESKDUPL_EXPORT void UnregisterDesktopChangeCalbakc(void);
+LIBDESKDUPL_EXPORT int DeskDuplRegisterAndStartDesktopChangeCalbakc(void* a_userData, TypeDesktopChange a_clbk);
+LIBDESKDUPL_EXPORT void DeskDuplUnregisterDesktopChangeCalbakc(void);
+LIBDESKDUPL_EXPORT int DeskDuplGetMouseQImage(void* CPPUTILS_ARG_NN a_qtImageBuffer, void* a_pCursorPos); // 1. QImage*, 2. QPoint* - can be null
+LIBDESKDUPL_EXPORT int DeskDuplGetCurrentScreen(void* CPPUTILS_ARG_NN a_qtImageBuffer, void* a_rectAll_p, void* a_pCursorPos); // 1. QImage*, 2. QRect* - can be null, 3 QPoint*
 
 
 CPPUTILS_END_C

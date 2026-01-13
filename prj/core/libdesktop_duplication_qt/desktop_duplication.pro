@@ -10,12 +10,7 @@ message("!!! $${_PRO_FILE_}")
 include ( "$${PWD}/../../common/common_qt/flagsandsys_common.pri" )
 include ( "$${cinternalRepoRoot}/prj/common/common_qt/core_lib_flags.pri" )
 
-#QT -= core
-#QT -= gui
-#CONFIG -= qt
-
-#DEFINES += CINTERNAL_LOAD_FROM_DLL
-#LIBS += -lcinternal
+DEFINES += LIBDESKDUPL_COMPILING_SHARED_LIB
 
 win32 {
 
@@ -38,7 +33,4 @@ HEADERS += $$files($${libDeskDuplRepoRoot}/src/core/libdesktop_duplication/*.hpp
 HEADERS += $$files($${libDeskDuplRepoRoot}/include/*.h,true)
 HEADERS += $$files($${libDeskDuplRepoRoot}/include/*.hpp,true)
 
-#OTHER_FILES += "$${systemMonitorRepoRoot}/scripts/unix_build_core_lib.sh"
-#OTHER_FILES += "$${systemMonitorRepoRoot}/scripts/unix_prepare_files_in_dir.sh"
-#OTHER_FILES += "$${systemMonitorRepoRoot}/scripts/windows_build_core_lib.bat"
-#OTHER_FILES += "$${systemMonitorRepoRoot}/scripts/windows_prepare_files_in_dir.bat"
+OTHER_FILES += $$files($${libDeskDuplRepoRoot}/src/core/libdesktop_duplication/*.mm,true)
