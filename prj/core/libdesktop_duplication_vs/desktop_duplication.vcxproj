@@ -99,8 +99,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\contrib\qtutils\contrib\emsutils\contrib\cinternal\src\core\cinternal_core_logger.c" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\deskdupl_mouse_pixmap.cpp" />
     <ClCompile Include="..\..\..\src\core\libdesktop_duplication\desktop_duplication_common.cpp" />
-    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\monitor_mouse_pixmap.cpp" />
     <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\DisplayManager.cpp" />
     <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\DuplicationManager.cpp" />
     <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\lib_dda_windows.cpp" />
@@ -108,7 +108,7 @@
     <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\ThreadManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\src\core\libdesktop_duplication\monitor_mouse_pixmap_apple.mm" />
+    <None Include="..\..\..\src\core\libdesktop_duplication\deskdupl_mouse_pixmap_apple.mm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

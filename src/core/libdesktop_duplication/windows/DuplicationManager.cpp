@@ -5,8 +5,6 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#ifdef _WIN32
-
 #include "DuplicationManager.h"
 
 //
@@ -111,8 +109,7 @@ DUPL_RETURN DUPLICATIONMANAGER::InitDupl(_In_ ID3D11Device* Device, UINT Output)
     {
         if (hr == DXGI_ERROR_NOT_CURRENTLY_AVAILABLE)
         {
-            // todo: DK - find proper error handling
-            //MessageBoxW(nullptr, L"There is already the maximum number of applications using the Desktop Duplication API running, please close one of those applications and then try again.", L"Error", MB_OK);
+            MessageBoxW(nullptr, L"There is already the maximum number of applications using the Desktop Duplication API running, please close one of those applications and then try again.", L"Error", MB_OK);
             return DUPL_RETURN_ERROR_UNEXPECTED;
         }
         return ProcessFailure(m_Device, L"Failed to get duplicate output in DUPLICATIONMANAGER", L"Error", hr, CreateDuplicationExpectedErrors);
@@ -320,5 +317,3 @@ void DUPLICATIONMANAGER::GetOutputDesc(_Out_ DXGI_OUTPUT_DESC* DescPtr)
 {
     *DescPtr = m_OutputDesc;
 }
-
-#endif  //  #ifdef _WIN32

@@ -15,7 +15,7 @@
 CPPUTILS_BEGIN_C
 
 
-typedef void (*TypeDesktopChange)(void* usrData,const void* qtImage);
+typedef void (*TypeDesktopChange)(void* usrData,const void* qtImage, const void* qtRect, const void* qtPoint);
 
 LIBDESKDUPL_EXPORT int DeskDuplRegisterAndStartDesktopChangeCalbakc(void* a_userData, TypeDesktopChange a_clbk);
 LIBDESKDUPL_EXPORT void DeskDuplUnregisterDesktopChangeCalbakc(void);

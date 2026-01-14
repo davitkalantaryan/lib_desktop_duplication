@@ -1,6 +1,3 @@
-
-#ifdef _WIN32
-
 #include <limits.h>
 #include <string>
 #include <atomic>
@@ -33,80 +30,6 @@ HRESULT SystemTransitionsExpectedErrors[] = {
     S_OK
 };
 
-//
-// Dynamic Wait Class (Copied from DesktopDuplication.cpp)
-//
-typedef struct
-{
-    UINT    WaitTime;
-    UINT    WaitCount;
-}WAIT_BAND;
-
-#define WAIT_BAND_COUNT 3
-#define WAIT_BAND_STOP 0
-
-class DYNAMIC_WAIT
-{
-public:
-    DYNAMIC_WAIT();
-    ~DYNAMIC_WAIT();
-    void Wait();
-
-private:
-    static const WAIT_BAND   m_WaitBands[WAIT_BAND_COUNT];
-    static const UINT       m_WaitSequenceTimeInSeconds = 2;
-    UINT                    m_CurrentWaitBandIdx;
-    UINT                    m_WaitCountInCurrentBand;
-    LARGE_INTEGER           m_QPCFrequency;
-    LARGE_INTEGER           m_LastWakeUpTime;
-    BOOL                    m_QPCValid;
-};
-
-const WAIT_BAND DYNAMIC_WAIT::m_WaitBands[WAIT_BAND_COUNT] = {
-    {250, 20},
-    {2000, 60},
-    {5000, WAIT_BAND_STOP}
-};
-
-DYNAMIC_WAIT::DYNAMIC_WAIT() : m_CurrentWaitBandIdx(0), m_WaitCountInCurrentBand(0)
-{
-    m_QPCValid = QueryPerformanceFrequency(&m_QPCFrequency);
-    m_LastWakeUpTime.QuadPart = 0L;
-}
-
-DYNAMIC_WAIT::~DYNAMIC_WAIT() {}
-
-void DYNAMIC_WAIT::Wait()
-{
-    LARGE_INTEGER CurrentQPC = { 0 };
-    QueryPerformanceCounter(&CurrentQPC);
-    if (m_QPCValid && (CurrentQPC.QuadPart <= (m_LastWakeUpTime.QuadPart + (m_QPCFrequency.QuadPart * m_WaitSequenceTimeInSeconds))))
-    {
-        if ((m_WaitBands[m_CurrentWaitBandIdx].WaitCount != WAIT_BAND_STOP) && (m_WaitCountInCurrentBand > m_WaitBands[m_CurrentWaitBandIdx].WaitCount))
-        {
-            m_CurrentWaitBandIdx++;
-            m_WaitCountInCurrentBand = 0;
-        }
-    }
-    else
-    {
-        m_WaitCountInCurrentBand = 0;
-        m_CurrentWaitBandIdx = 0;
-    }
-    Sleep(m_WaitBands[m_CurrentWaitBandIdx].WaitTime);
-    QueryPerformanceCounter(&m_LastWakeUpTime);
-    m_WaitCountInCurrentBand++;
-}
-
-void DisplayMsg(_In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr)
-{
-    // Simplified logging/error handling for library
-    // For now, suppress message boxes or log to debug output
-    (void)Title;
-    (void)hr;
-    OutputDebugStringW(Str);
-}
-
 
 //
 // Entry point for new duplication threads
@@ -123,6 +46,11 @@ DWORD WINAPI DDProc(_In_ void* Param)
 
     // Data passed in from thread creation
     THREAD_DATA* TData = reinterpret_cast<THREAD_DATA*>(Param);
+    THREADMANAGER* ThreadMgr = reinterpret_cast<THREADMANAGER*>(TData->ThreadMgr);
+
+    // PTR_INFO for this thread to use during capture
+    PTR_INFO LocalPtrInfo;
+    RtlZeroMemory(&LocalPtrInfo, sizeof(LocalPtrInfo));
 
     // Get desktop
     DUPL_RETURN Ret;
@@ -205,7 +133,7 @@ DWORD WINAPI DDProc(_In_ void* Param)
 
         // We have a new frame so try and process it
         // Try to acquire keyed mutex in order to access shared surface
-        hr = KeyMutex->AcquireSync(0, 1000);
+        hr = KeyMutex->AcquireSync(0, 5000);
         if (hr == static_cast<HRESULT>(WAIT_TIMEOUT))
         {
             // Can't use shared surface right now, try again later
@@ -223,14 +151,17 @@ DWORD WINAPI DDProc(_In_ void* Param)
         // We can now process the current frame
         WaitToProcessCurrentFrame = false;
 
-        // Get mouse info
-        Ret = DuplMgr.GetMouse(TData->PtrInfo, &(CurrentData.FrameInfo), TData->OffsetX, TData->OffsetY);
+        // Get mouse info into local buffer
+        Ret = DuplMgr.GetMouse(&LocalPtrInfo, &(CurrentData.FrameInfo), TData->OffsetX, TData->OffsetY);
         if (Ret != DUPL_RETURN_SUCCESS)
         {
             DuplMgr.DoneWithFrame();
             KeyMutex->ReleaseSync(1);
             break;
         }
+
+        // Synchronize local mouse info with global state
+        ThreadMgr->UpdatePointerInfo(&LocalPtrInfo);
 
         // Process new frame
         Ret = DispMgr.ProcessFrame(&CurrentData, SharedSurf, TData->OffsetX, TData->OffsetY, &DesktopDesc);
@@ -250,6 +181,9 @@ DWORD WINAPI DDProc(_In_ void* Param)
             DuplMgr.DoneWithFrame();
             break;
         }
+
+        // Signal consumer that there is a new frame on the shared surface
+        SetEvent(TData->NewFrameEvent);
 
         // Release frame back to desktop duplication
         Ret = DuplMgr.DoneWithFrame();
@@ -274,16 +208,10 @@ Exit:
         }
     }
 
-    if (SharedSurf)
+    if (LocalPtrInfo.PtrShapeBuffer)
     {
-        SharedSurf->Release();
-        SharedSurf = nullptr;
-    }
-
-    if (KeyMutex)
-    {
-        KeyMutex->Release();
-        KeyMutex = nullptr;
+        delete [] LocalPtrInfo.PtrShapeBuffer;
+        LocalPtrInfo.PtrShapeBuffer = nullptr;
     }
 
     return 0;
@@ -311,19 +239,6 @@ HRESULT EnumOutputsExpectedErrors[] = {
     S_OK
 };
 
-
-//
-// Displays a message (Defined earlier but ensuring it matches expectation)
-//
-/*
-void DisplayMsg(_In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr)
-{
-    // Simplified logging/error handling for library
-    // For now, suppress message boxes or log to debug output
-    OutputDebugStringW(Str);
-}
-*/
-// Assuming DisplayMsg is already defined in this file (checked line 104 in previous version).
 
 _Post_satisfies_(return != DUPL_RETURN_SUCCESS)
 DUPL_RETURN ProcessFailure(_In_opt_ ID3D11Device* Device, _In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr, _In_opt_z_ HRESULT* ExpectedErrors)
@@ -381,7 +296,7 @@ DUPL_RETURN ProcessFailure(_In_opt_ ID3D11Device* Device, _In_ LPCWSTR Str, _In_
     }
 
     // Error was not expected so display the message box
-    DisplayMsg(Str, Title, TranslatedHr);
+    OutputDebugStringW(Str);
 
     return DUPL_RETURN_ERROR_UNEXPECTED;
 }
@@ -398,17 +313,23 @@ unsigned int __stdcall WrapperProc(void* data)
     RECT DeskBounds;
     UINT OutputCount;
     bool FirstTime = true;
-    bool Occluded = false;
-    DYNAMIC_WAIT DynamicWait;
-
-    while (WaitForSingleObjectEx(UnexpectedErrorEvent, 0, FALSE) != WAIT_OBJECT_0)
+    
+    // Create event to signal new frames from monitor threads
+    HANDLE NewFrameEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+    if (!NewFrameEvent)
     {
-        // Check if we requested termination externally
-        if (WaitForSingleObjectEx(TerminateThreadsEvent, 0, FALSE) == WAIT_OBJECT_0)
-        {
-            break;
-        }
+        return -1;
+    }
 
+    HANDLE WaitHandles[4] = {
+        TerminateThreadsEvent,
+        ExpectedErrorEvent,
+        UnexpectedErrorEvent,
+        NewFrameEvent
+    };
+
+    while (true)
+    {
         DUPL_RETURN Ret = DUPL_RETURN_SUCCESS;
 
         if (FirstTime || WaitForSingleObjectEx(ExpectedErrorEvent, 0, FALSE) == WAIT_OBJECT_0)
@@ -423,8 +344,6 @@ unsigned int __stdcall WrapperProc(void* data)
 
                 ThreadMgr.Clean();
                 OutMgr.CleanRefs();
-
-                DynamicWait.Wait();
             }
             else
             {
@@ -439,7 +358,7 @@ unsigned int __stdcall WrapperProc(void* data)
                 if (SharedHandle)
                 {
                     // Pass events to ThreadManager so it can signal them
-                    Ret = ThreadMgr.Initialize(SingleOutput, OutputCount, UnexpectedErrorEvent, ExpectedErrorEvent, TerminateThreadsEvent, SharedHandle, &DeskBounds);
+                    Ret = ThreadMgr.Initialize(SingleOutput, OutputCount, UnexpectedErrorEvent, ExpectedErrorEvent, TerminateThreadsEvent, NewFrameEvent, SharedHandle, &DeskBounds);
                 }
                 else
                 {
@@ -447,12 +366,59 @@ unsigned int __stdcall WrapperProc(void* data)
                 }
             }
 
-            Occluded = true;
+            // After initialization, attempt to capture the initial state immediately
+            bool FrameProcessed = false;
+            PTR_INFO LatestPtr;
+            ThreadMgr.GetPointerInfo(&LatestPtr);
+            OutMgr.ConsumeFrame(&LatestPtr, &FrameProcessed);
         }
         else
         {
-            // Update/Save Frame
-            Ret = OutMgr.UpdateApplicationWindow(ThreadMgr.GetPointerInfo(), &Occluded);
+            // Wait for any of the events
+            DWORD WaitResult = WaitForMultipleObjects(4, WaitHandles, FALSE, INFINITE);
+            
+            if (WaitResult == WAIT_OBJECT_0 || WaitResult == WAIT_OBJECT_0 + 2) // Terminate or UnexpectedError
+            {
+                // Shutdown started. 
+                // 1. Signal termination to all threads (already done by user or by error)
+                // 2. Wait for all monitor threads to exit gracefully
+                ThreadMgr.WaitForThreadTermination();
+
+                // 3. Drain Loop: Capture any final frames that were generated during shutdown.
+                // We do a brief loop to ensure the pipeline is empty.
+                for (int i = 0; i < 5; ++i)
+                {
+                    bool FrameProcessed = false;
+                    PTR_INFO LatestPtr;
+                    ThreadMgr.GetPointerInfo(&LatestPtr);
+                    OutMgr.ConsumeFrame(&LatestPtr, &FrameProcessed);
+                    if (!FrameProcessed) break; 
+                }
+                
+                // 4. Finally clean up resources
+                ThreadMgr.Clean();
+                break;
+            }
+            
+            if (WaitResult == WAIT_OBJECT_0 + 1) // ExpectedError
+            {
+                continue; // Loop around to handle FirstTime || ExpectedError condition
+            }
+
+            if (WaitResult == WAIT_OBJECT_0 + 3) // NewFrameEvent
+            {
+                // Consume/Save Frame
+                bool FrameProcessed = false;
+                PTR_INFO LatestPtr;
+                ThreadMgr.GetPointerInfo(&LatestPtr);
+                Ret = OutMgr.ConsumeFrame(&LatestPtr, &FrameProcessed);
+                
+                // Cleanup local copy of shape buffer if needed
+                if (LatestPtr.PtrShapeBuffer) {
+                    // Note: In this architecture, drawing usually happens on the same background thread or via staging,
+                    // but we ensure we don't leak if the getter allocated anything (it shouldn't in this version).
+                }
+            }
         }
 
         if (Ret != DUPL_RETURN_SUCCESS)
@@ -468,19 +434,18 @@ unsigned int __stdcall WrapperProc(void* data)
         }
     }
 
-    // Cleanup monitor threads if they are running
-    SetEvent(TerminateThreadsEvent);
-    ThreadMgr.WaitForThreadTermination();
-    
     // Final cleanup
     ThreadMgr.Clean();
     OutMgr.CleanRefs();
 
+    if (NewFrameEvent)
+    {
+        CloseHandle(NewFrameEvent);
+    }
+
     return 0;
 }
 
-
-CPPUTILS_BEGIN_C
 
 LIBDESKDUPL_EXPORT int DeskDuplRegisterAndStartDesktopChangeCalbakc(void* a_userData, TypeDesktopChange a_clbk)
 {
@@ -515,7 +480,6 @@ LIBDESKDUPL_EXPORT int DeskDuplRegisterAndStartDesktopChangeCalbakc(void* a_user
     return 0;
 }
 
-
 LIBDESKDUPL_EXPORT void DeskDuplUnregisterDesktopChangeCalbakc(void)
 {
     if (WrapperThreadHandle)
@@ -539,9 +503,3 @@ LIBDESKDUPL_EXPORT void DeskDuplUnregisterDesktopChangeCalbakc(void)
     ExpectedErrorEvent = nullptr;
     TerminateThreadsEvent = nullptr;
 }
-
-
-CPPUTILS_END_C
-
-
-#endif  //  #ifdef _WIN32

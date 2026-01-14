@@ -5,9 +5,6 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-
-#ifdef _WIN32
-
 #include <algorithm>
 #include <vector>
 using std::min;
@@ -16,6 +13,7 @@ using std::max;
 #include <QImage>
 #include <QString>
 #include <QDir>
+#include <d3d11_4.h>
 
 
 using namespace DirectX;
@@ -90,6 +88,14 @@ DUPL_RETURN OUTPUTMANAGER::InitOutput(INT SingleOutput, _Out_ UINT* OutCount, _O
     if (FAILED(hr))
     {
         return ProcessFailure(m_Device, L"Device creation in OUTPUTMANAGER failed", L"Error", hr, SystemTransitionsExpectedErrors);
+    }
+
+    // Enable multithreaded mode for the context to handle access from multiple threads
+    ID3D11Multithread* pMultithread = nullptr;
+    if (SUCCEEDED(m_DeviceContext->QueryInterface(__uuidof(ID3D11Multithread), (void**)&pMultithread)))
+    {
+        pMultithread->SetMultithreadProtected(TRUE);
+        pMultithread->Release();
     }
 
     // Get DXGI factory
@@ -197,6 +203,11 @@ DUPL_RETURN OUTPUTMANAGER::InitOutput(INT SingleOutput, _Out_ UINT* OutCount, _O
     if (Return != DUPL_RETURN_SUCCESS)
     {
         return Return;
+    }
+
+    if (Return == DUPL_RETURN_SUCCESS)
+    {
+        m_DesktopRect = *DeskBounds;
     }
 
     return Return;
@@ -383,20 +394,18 @@ DUPL_RETURN OUTPUTMANAGER::CreateSharedSurf(INT SingleOutput, _Out_ UINT* OutCou
 }
 
 //
-// Present to the application window
+// Consume frame from shared surface and save
 //
-DUPL_RETURN OUTPUTMANAGER::UpdateApplicationWindow(_In_ PTR_INFO* PointerInfo, _Inout_ bool* Occluded)
+DUPL_RETURN OUTPUTMANAGER::ConsumeFrame(_In_ PTR_INFO* PointerInfo, _Out_ bool* pFrameProcessed)
 {
-    // In a typical desktop duplication application there would be an application running on one system collecting the desktop images
-    // and another application running on a different system that receives the desktop images via a network and display the image. This
-    // sample contains both these aspects into a single application.
-    // This routine is the part of the sample that displays the desktop image onto the display
+    *pFrameProcessed = false;
 
-    // Try and acquire sync on common display buffer
-    HRESULT hr = m_KeyMutex->AcquireSync(1, 100);
+    // Acquire keyed mutex in order to access shared surface
+    // Wait up to 5 seconds to give plenty of time for consumer processing (callback/save)
+    HRESULT hr = m_KeyMutex->AcquireSync(1, 5000);
     if (hr == static_cast<HRESULT>(WAIT_TIMEOUT))
     {
-        // Another thread has the keyed mutex so try again later
+        *pFrameProcessed = false;
         return DUPL_RETURN_SUCCESS;
     }
     else if (FAILED(hr))
@@ -404,33 +413,27 @@ DUPL_RETURN OUTPUTMANAGER::UpdateApplicationWindow(_In_ PTR_INFO* PointerInfo, _
         return ProcessFailure(m_Device, L"Failed to acquire Keyed mutex in OUTPUTMANAGER", L"Error", hr, SystemTransitionsExpectedErrors);
     }
 
-    (void)Occluded;
-
     // Got mutex, so draw
     DUPL_RETURN Ret = DrawFrame();
     if (Ret == DUPL_RETURN_SUCCESS)
     {
         // We have keyed mutex so we can access the mouse info
-        if (PointerInfo->Visible)
-        {
-            // Draw mouse into texture
-            Ret = DrawMouse(PointerInfo);
-        }
+        // Mouse drawing is now handled in SaveCurrentFrame
     }
 
-    // Release keyed mutex
+    // Release keyed mutex to 0 so duplication threads can acquire it
     hr = m_KeyMutex->ReleaseSync(0);
     if (FAILED(hr))
     {
         return ProcessFailure(m_Device, L"Failed to Release Keyed mutex in OUTPUTMANAGER", L"Error", hr, SystemTransitionsExpectedErrors);
     }
 
-    // Present to window if all worked
-    // Present to window if all worked
+    // Save frame if all worked
     if (Ret == DUPL_RETURN_SUCCESS)
     {
         // Save the frame directly from the output texture
-        SaveCurrentFrame(m_OutputTexture);
+        SaveCurrentFrame(m_OutputTexture, PointerInfo);
+        *pFrameProcessed = true;
     }
 
     return Ret;
@@ -502,9 +505,17 @@ DUPL_RETURN OUTPUTMANAGER::DrawFrame()
     // Set resources
     UINT Stride = sizeof(VERTEX);
     UINT Offset = 0;
-    FLOAT blendFactor[4] = {0.f, 0.f, 0.f, 0.f};
+    FLOAT blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
     m_DeviceContext->OMSetBlendState(nullptr, blendFactor, 0xffffffff);
+    
+    const FLOAT Black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    m_DeviceContext->ClearRenderTargetView(m_RTV, Black);
     m_DeviceContext->OMSetRenderTargets(1, &m_RTV, nullptr);
+
+    // Clear background to black
+    FLOAT clearColor[4] = { 0.f, 0.f, 0.f, 1.f };
+    m_DeviceContext->ClearRenderTargetView(m_RTV, clearColor);
+
     m_DeviceContext->VSSetShader(m_VertexShader, nullptr, 0);
     m_DeviceContext->PSSetShader(m_PixelShader, nullptr, 0);
     m_DeviceContext->PSSetShaderResources(0, 1, &ShaderResource);
@@ -722,7 +733,7 @@ DUPL_RETURN OUTPUTMANAGER::ProcessMonoMask(bool IsMono, _Inout_ PTR_INFO* PtrInf
     // Done with resource
     hr = CopySurface->Unmap();
     CopySurface->Release();
-    CopySurface = nullptr;
+CopySurface = nullptr;
     if (FAILED(hr))
     {
         return ProcessFailure(m_Device, L"Failed to unmap surface for pointer", L"Error", hr, SystemTransitionsExpectedErrors);
@@ -1095,8 +1106,10 @@ void OUTPUTMANAGER::SetFrameCallback(TypeDesktopChange callback, void* userData)
     m_FrameCallback = callback;
     m_CallbackUserData = userData;
 }
-
-void OUTPUTMANAGER::SaveCurrentFrame(ID3D11Texture2D* sourceTexture)
+//
+// Save current frame to memory and call callback
+//
+void OUTPUTMANAGER::SaveCurrentFrame(ID3D11Texture2D* sourceTexture, _In_ PTR_INFO* PointerInfo)
 {
     HRESULT hr;
     D3D11_TEXTURE2D_DESC desc;
@@ -1125,37 +1138,47 @@ void OUTPUTMANAGER::SaveCurrentFrame(ID3D11Texture2D* sourceTexture)
             m_StagingTexture->Release();
             m_StagingTexture = nullptr;
             // Recursively call to recreate
-            SaveCurrentFrame(sourceTexture);
+            SaveCurrentFrame(sourceTexture, PointerInfo);
             return;
         }
+    }
+
+    // Ensure mouse is drawn on the snapshot BEFORE we copy to staging
+    if (PointerInfo->Visible)
+    {
+        DrawMouse(PointerInfo);
     }
 
     // Copy to staging texture
     m_DeviceContext->CopyResource(m_StagingTexture, sourceTexture);
 
-    // Map for CPU read
-    D3D11_MAPPED_SUBRESOURCE mapped;
-    hr = m_DeviceContext->Map(m_StagingTexture, 0, D3D11_MAP_READ, 0, &mapped);
-    if (FAILED(hr)) return;
+    // Flush GPU commands to ensure all work (including DrawMouse) is finished
+    m_DeviceContext->Flush();
 
-    // Create QImage
-    // Note: Format_RGB32 is effectively BGR/BGRA in Qt on little endian, but DX11 B8G8R8A8 is exactly what we have.
+    // Map staging texture for CPU read
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    hr = m_DeviceContext->Map(m_StagingTexture, 0, D3D11_MAP_READ, 0, &mappedResource);
+    if (FAILED(hr))
+    {
+        return;
+    }
+
+    // Create QImage and copy data row-by-row to handle alignment (RowPitch)
     QImage image(desc.Width, desc.Height, QImage::Format_RGB32);
-
-    // Copy row-by-row
-    for (UINT y = 0; y < desc.Height; y++) {
-        uint8_t* srcRow = (uint8_t*)mapped.pData + (y * mapped.RowPitch);
+    for (UINT y = 0; y < desc.Height; y++)
+    {
+        uint8_t* srcRow = reinterpret_cast<uint8_t*>(mappedResource.pData) + (y * mappedResource.RowPitch);
         uint8_t* dstRow = image.scanLine(y);
         memcpy(dstRow, srcRow, desc.Width * 4);
     }
 
     m_DeviceContext->Unmap(m_StagingTexture, 0);
 
-    // If callback is set, use it
+    // Invoke user callback with enriched metadata
     if (m_FrameCallback)
     {
-        m_FrameCallback(m_CallbackUserData, (const void*)&image);
+        QRect rect(m_DesktopRect.left, m_DesktopRect.top, m_DesktopRect.right - m_DesktopRect.left, m_DesktopRect.bottom - m_DesktopRect.top);
+        QPoint mousePoint(PointerInfo->Position.x, PointerInfo->Position.y);
+        m_FrameCallback(m_CallbackUserData, (const void*)&image, (const void*)&rect, (const void*)&mousePoint);
     }
 }
-
-#endif  //  #ifdef _WIN32

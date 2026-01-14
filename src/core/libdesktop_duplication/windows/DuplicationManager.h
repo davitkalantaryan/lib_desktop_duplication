@@ -5,9 +5,6 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-
-#ifdef _WIN32
-
 #ifndef _DUPLICATIONMANAGER_H_
 #define _DUPLICATIONMANAGER_H_
 
@@ -40,6 +37,3 @@ class DUPLICATIONMANAGER
 };
 
 #endif
-
-
-#endif  //  #ifdef _WIN32

@@ -5,8 +5,6 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#ifdef _WIN32
-
 #ifndef _THREADMANAGER_H_
 #define _THREADMANAGER_H_
 
@@ -18,8 +16,9 @@ class THREADMANAGER
         THREADMANAGER();
         ~THREADMANAGER();
         void Clean();
-        DUPL_RETURN Initialize(INT SingleOutput, UINT OutputCount, HANDLE UnexpectedErrorEvent, HANDLE ExpectedErrorEvent, HANDLE TerminateThreadsEvent, HANDLE SharedHandle, _In_ RECT* DesktopDim);
-        PTR_INFO* GetPointerInfo();
+        DUPL_RETURN Initialize(INT SingleOutput, UINT OutputCount, HANDLE UnexpectedErrorEvent, HANDLE ExpectedErrorEvent, HANDLE TerminateThreadsEvent, HANDLE NewFrameEvent, HANDLE SharedHandle, _In_ RECT* DesktopDim);
+        void GetPointerInfo(_Out_ PTR_INFO* PtrInfo);
+        void UpdatePointerInfo(_In_ PTR_INFO* PtrInfo);
         void WaitForThreadTermination();
 
     private:
@@ -27,11 +26,10 @@ class THREADMANAGER
         void CleanDx(_Inout_ DX_RESOURCES* Data);
 
         PTR_INFO m_PtrInfo;
+        std::mutex m_PtrMutex;
         UINT m_ThreadCount;
         _Field_size_(m_ThreadCount) HANDLE* m_ThreadHandles;
         _Field_size_(m_ThreadCount) THREAD_DATA* m_ThreadData;
 };
 
 #endif
-
-#endif  //  #ifdef _WIN32

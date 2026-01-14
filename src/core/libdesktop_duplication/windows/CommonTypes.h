@@ -5,9 +5,6 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-
-#ifdef _WIN32
-
 #ifndef _COMMONTYPES_H_
 #define _COMMONTYPES_H_
 
@@ -18,6 +15,7 @@
 #include <new>
 #include <warning.h>
 #include <DirectXMath.h>
+#include <mutex>
 
 #include "PixelShader.h"
 #include "VertexShader.h"
@@ -42,8 +40,6 @@ typedef _Return_type_success_(return == DUPL_RETURN_SUCCESS) enum
 
 _Post_satisfies_(return != DUPL_RETURN_SUCCESS)
 DUPL_RETURN ProcessFailure(_In_opt_ ID3D11Device* Device, _In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr, _In_opt_z_ HRESULT* ExpectedErrors = nullptr);
-
-void DisplayMsg(_In_ LPCWSTR Str, _In_ LPCWSTR Title, HRESULT hr);
 
 //
 // Holds info about the pointer/cursor
@@ -90,9 +86,10 @@ typedef struct _THREAD_DATA
     UINT Output;
     INT OffsetX;
     INT OffsetY;
-    PTR_INFO* PtrInfo;
+    void* ThreadMgr;
     DX_RESOURCES DxRes;
     bool InitialFrameCaptured;
+    HANDLE NewFrameEvent;
 } THREAD_DATA;
 
 //
@@ -117,5 +114,3 @@ typedef struct _VERTEX
 } VERTEX;
 
 #endif
-
-#endif  //  #ifdef _WIN32

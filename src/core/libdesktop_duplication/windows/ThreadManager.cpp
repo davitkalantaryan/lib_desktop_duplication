@@ -5,8 +5,6 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#ifdef _WIN32
-
 #include "ThreadManager.h"
 
 DWORD WINAPI DDProc(_In_ void* Param);
@@ -35,6 +33,16 @@ void THREADMANAGER::Clean()
     }
     RtlZeroMemory(&m_PtrInfo, sizeof(m_PtrInfo));
 
+    if (m_ThreadData)
+    {
+        for (UINT i = 0; i < m_ThreadCount; ++i)
+        {
+            CleanDx(&m_ThreadData[i].DxRes);
+        }
+        delete [] m_ThreadData;
+        m_ThreadData = nullptr;
+    }
+
     if (m_ThreadHandles)
     {
         for (UINT i = 0; i < m_ThreadCount; ++i)
@@ -46,16 +54,6 @@ void THREADMANAGER::Clean()
         }
         delete [] m_ThreadHandles;
         m_ThreadHandles = nullptr;
-    }
-
-    if (m_ThreadData)
-    {
-        for (UINT i = 0; i < m_ThreadCount; ++i)
-        {
-            CleanDx(&m_ThreadData[i].DxRes);
-        }
-        delete [] m_ThreadData;
-        m_ThreadData = nullptr;
     }
 
     m_ThreadCount = 0;
@@ -106,7 +104,7 @@ void THREADMANAGER::CleanDx(_Inout_ DX_RESOURCES* Data)
 //
 // Start up threads for DDA
 //
-DUPL_RETURN THREADMANAGER::Initialize(INT SingleOutput, UINT OutputCount, HANDLE UnexpectedErrorEvent, HANDLE ExpectedErrorEvent, HANDLE TerminateThreadsEvent, HANDLE SharedHandle, _In_ RECT* DesktopDim)
+DUPL_RETURN THREADMANAGER::Initialize(INT SingleOutput, UINT OutputCount, HANDLE UnexpectedErrorEvent, HANDLE ExpectedErrorEvent, HANDLE TerminateThreadsEvent, HANDLE NewFrameEvent, HANDLE SharedHandle, _In_ RECT* DesktopDim)
 {
     m_ThreadCount = OutputCount;
     m_ThreadHandles = new (std::nothrow) HANDLE[m_ThreadCount];
@@ -123,11 +121,12 @@ DUPL_RETURN THREADMANAGER::Initialize(INT SingleOutput, UINT OutputCount, HANDLE
         m_ThreadData[i].UnexpectedErrorEvent = UnexpectedErrorEvent;
         m_ThreadData[i].ExpectedErrorEvent = ExpectedErrorEvent;
         m_ThreadData[i].TerminateThreadsEvent = TerminateThreadsEvent;
+        m_ThreadData[i].NewFrameEvent = NewFrameEvent;
         m_ThreadData[i].Output = (SingleOutput < 0) ? i : SingleOutput;
         m_ThreadData[i].TexSharedHandle = SharedHandle;
         m_ThreadData[i].OffsetX = DesktopDim->left;
         m_ThreadData[i].OffsetY = DesktopDim->top;
-        m_ThreadData[i].PtrInfo = &m_PtrInfo;
+        m_ThreadData[i].ThreadMgr = this;
         m_ThreadData[i].InitialFrameCaptured = false;
 
         RtlZeroMemory(&m_ThreadData[i].DxRes, sizeof(DX_RESOURCES));
@@ -246,11 +245,49 @@ DUPL_RETURN THREADMANAGER::InitializeDx(_Out_ DX_RESOURCES* Data)
 }
 
 //
-// Getter for the PTR_INFO structure
+// Thread-safe getter for pointer info
 //
-PTR_INFO* THREADMANAGER::GetPointerInfo()
+void THREADMANAGER::GetPointerInfo(_Out_ PTR_INFO* PtrInfo)
 {
-    return &m_PtrInfo;
+    std::lock_guard<std::mutex> lock(m_PtrMutex);
+    
+    // Copy base POD data
+    *PtrInfo = m_PtrInfo;
+    
+    // For the buffer, we assume the caller has allocated enough space if needed, 
+    // but in this architecture, the caller (ConsumeFrame -> SaveCurrentFrame) typically 
+    // uses the pointer info for drawing on the same device.
+    // However, to be safe during drawing, we keep the buffer pointer.
+}
+
+//
+// Thread-safe update for pointer info
+//
+void THREADMANAGER::UpdatePointerInfo(_In_ PTR_INFO* PtrInfo)
+{
+    std::lock_guard<std::mutex> lock(m_PtrMutex);
+    
+    if (PtrInfo->BufferSize > m_PtrInfo.BufferSize)
+    {
+        if (m_PtrInfo.PtrShapeBuffer)
+        {
+            delete [] m_PtrInfo.PtrShapeBuffer;
+        }
+        m_PtrInfo.PtrShapeBuffer = new (std::nothrow) BYTE[PtrInfo->BufferSize];
+        m_PtrInfo.BufferSize = PtrInfo->BufferSize;
+    }
+    
+    if (m_PtrInfo.PtrShapeBuffer && PtrInfo->PtrShapeBuffer)
+    {
+        memcpy(m_PtrInfo.PtrShapeBuffer, PtrInfo->PtrShapeBuffer, PtrInfo->BufferSize);
+    }
+    
+    // Copy other fields
+    m_PtrInfo.Position = PtrInfo->Position;
+    m_PtrInfo.Visible = PtrInfo->Visible;
+    m_PtrInfo.ShapeInfo = PtrInfo->ShapeInfo;
+    m_PtrInfo.WhoUpdatedPositionLast = PtrInfo->WhoUpdatedPositionLast;
+    m_PtrInfo.LastTimeStamp = PtrInfo->LastTimeStamp;
 }
 
 //
@@ -263,6 +300,3 @@ void THREADMANAGER::WaitForThreadTermination()
         WaitForMultipleObjectsEx(m_ThreadCount, m_ThreadHandles, TRUE, INFINITE, FALSE);
     }
 }
-
-
-#endif  //  #ifdef _WIN32
