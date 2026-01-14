@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\src">
+      <UniqueIdentifier>{9cecf011-a8d6-47ce-ac8c-ae28b75d6a3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\core">
+      <UniqueIdentifier>{44d5556b-5b9f-4e8a-97b5-4c4f02bcecaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\core\libdesktop_duplication">
+      <UniqueIdentifier>{56cd903e-a30d-42b5-82dc-05ae81c1a605}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src\core\libdesktop_duplication\windows">
+      <UniqueIdentifier>{95191b51-8e3a-49cc-8319-0c993f3fcd63}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\tests\main_deskdupl_test01.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\desktop_duplication_common.cpp">
+      <Filter>Source Files\src\core\libdesktop_duplication</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\deskdupl_mouse_pixmap.cpp">
+      <Filter>Source Files\src\core\libdesktop_duplication</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\deskdupl_makescreenshot_common.cpp">
+      <Filter>Source Files\src\core\libdesktop_duplication</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\DisplayManager.cpp">
+      <Filter>Source Files\src\core\libdesktop_duplication\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\DuplicationManager.cpp">
+      <Filter>Source Files\src\core\libdesktop_duplication\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\lib_dda_windows.cpp">
+      <Filter>Source Files\src\core\libdesktop_duplication\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\OutputManager.cpp">
+      <Filter>Source Files\src\core\libdesktop_duplication\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\ThreadManager.cpp">
+      <Filter>Source Files\src\core\libdesktop_duplication\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\contrib\qtutils\contrib\emsutils\contrib\cinternal\src\core\cinternal_core_logger.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\PixelShader.hlsl" />
+    <FxCompile Include="..\..\..\src\core\libdesktop_duplication\windows\VertexShader.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\core\libdesktop_duplication\deskdupl_mouse_pixmap_apple.mm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\desktop_duplication_private_header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\CommonTypes.h">
+      <Filter>Source Files\src\core\libdesktop_duplication\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\DisplayManager.h">
+      <Filter>Source Files\src\core\libdesktop_duplication\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\DuplicationManager.h">
+      <Filter>Source Files\src\core\libdesktop_duplication\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\OutputManager.h">
+      <Filter>Source Files\src\core\libdesktop_duplication\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\ThreadManager.h">
+      <Filter>Source Files\src\core\libdesktop_duplication\windows</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

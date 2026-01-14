@@ -19,11 +19,13 @@ struct CallbackData {
 };
 
 // Callback function
-void FrameCallback(void* userData, const void* a_img)
+void FrameCallback(void* userData, const void* a_img, const void* a_qtRect, const void* a_qtPoint)
 {
     const QImage* img = (const QImage*)a_img;
     if (!userData || !img) return;
     CallbackData* data = (CallbackData*)userData;
+    (void)a_qtRect;
+    (void)a_qtPoint;
 
     // Save
     const QString fileName = QString("frame_%1.png").arg(data->FrameCount, 6, 10, QChar('0'));
@@ -52,7 +54,7 @@ int main(int a_argc, char* a_argv[])
 
     QImage instBuff;
     if(!DeskDuplGetCurrentScreen(&instBuff,false,nullptr,nullptr)){
-        FrameCallback(&cbData,&instBuff);
+        FrameCallback(&cbData,&instBuff,nullptr,nullptr);
     }
 
     // Register Callbacks
@@ -64,7 +66,7 @@ int main(int a_argc, char* a_argv[])
     }
 
     if(!DeskDuplGetCurrentScreen(&instBuff,false,nullptr,nullptr)){
-        FrameCallback(&cbData,&instBuff);
+        FrameCallback(&cbData,&instBuff, nullptr, nullptr);
     }
 
     QCoreApplication::exec();

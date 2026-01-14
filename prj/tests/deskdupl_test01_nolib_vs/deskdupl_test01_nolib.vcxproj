@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{329fc534-7544-435f-b74d-066c06dec916}</ProjectGuid>
+    <RootNamespace>deskdupltest01nolib</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>$(PlatformToolsetVar)</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>$(PlatformToolsetVar)</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\common\common_vs\flagsandsys_common.props" />
+    <Import Project="..\..\common\common_vs\libdeskdupl_qtconfig.props" />
+    <Import Project="..\..\common\common_vs\libdeskdupl_hlslconfig.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\common\common_vs\flagsandsys_common.props" />
+    <Import Project="..\..\common\common_vs\libdeskdupl_qtconfig.props" />
+    <Import Project="..\..\common\common_vs\libdeskdupl_hlslconfig.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)..\..\..\sys\win_$(PlatformTarget)\$(Configuration)\test\</OutDir>
+    <IntDir>$(ProjectDir)..\..\..\sys\win_$(PlatformTarget)\$(Configuration)\.other\objects\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)..\..\..\sys\win_$(PlatformTarget)\$(Configuration)\test\</OutDir>
+    <IntDir>$(ProjectDir)..\..\..\sys\win_$(PlatformTarget)\$(Configuration)\.other\objects\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Qt6Guid.lib;Qt6Cored.lib;d3d11.lib;dxgi.lib;Gdi32.lib;User32.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Qt6Gui.lib;Qt6Core.lib;d3d11.lib;dxgi.lib;Gdi32.lib;User32.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\contrib\qtutils\contrib\emsutils\contrib\cinternal\src\core\cinternal_core_logger.c" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\deskdupl_makescreenshot_common.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\deskdupl_mouse_pixmap.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\desktop_duplication_common.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\DisplayManager.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\DuplicationManager.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\lib_dda_windows.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\OutputManager.cpp" />
+    <ClCompile Include="..\..\..\src\core\libdesktop_duplication\windows\ThreadManager.cpp" />
+    <ClCompile Include="..\..\..\src\tests\main_deskdupl_test01.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\core\libdesktop_duplication\deskdupl_mouse_pixmap_apple.mm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\desktop_duplication_private_header.h" />
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\CommonTypes.h" />
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\DisplayManager.h" />
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\DuplicationManager.h" />
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\OutputManager.h" />
+    <ClInclude Include="..\..\..\src\core\libdesktop_duplication\windows\ThreadManager.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
