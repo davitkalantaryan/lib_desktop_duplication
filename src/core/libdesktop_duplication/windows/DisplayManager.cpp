@@ -5,6 +5,7 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+#include <cinternal/internal_header.h>
 #include "DisplayManager.h"
 using namespace DirectX;
 
@@ -299,6 +300,7 @@ void DISPLAYMANAGER::SetDirtyVert(_Out_writes_(NUMVERTICES) VERTEX* Vertices, _I
         }
         default:
             assert(false); // drop through
+            CPPUTILS_FALLTHROUGH
         case DXGI_MODE_ROTATION_UNSPECIFIED:
         case DXGI_MODE_ROTATION_IDENTITY:
         {
