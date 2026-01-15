@@ -11,6 +11,7 @@
 #endif
 
 #include "OutputManager.h"
+#include "../desktop_duplication_private_header.h"
 
 #ifdef LIBDESKDUPL_HAS_DDAPI
 
@@ -355,50 +356,25 @@ DUPL_RETURN OUTPUTMANAGER::CreateSharedSurf(INT SingleOutput, _Out_ UINT* OutCou
         return ProcessFailure(m_Device, L"Failed to query for keyed mutex in OUTPUTMANAGER", L"Error", hr);
     }
 
-    // Initialize the shared surface with the current desktop image using GDI
-    // This ensures we have valid content immediately without waiting for monitor updates
+    // Initialize the shared surface with the current desktop image using the working Qt-based logic
+    // This ensures we have valid content immediately without waiting for monitor updates and avoids GDI coordinate issues
     
-    // 1. Calculations
-    int width = DeskBounds->right - DeskBounds->left;
-    int height = DeskBounds->bottom - DeskBounds->top;
-    
-    // 2. Create GDI compatible DC and Bitmap
-    HDC hScreenDC = GetDC(NULL); // Get DC for the entire virtual screen
-    HDC hMemDC = CreateCompatibleDC(hScreenDC);
-    HBITMAP hBitmap = CreateCompatibleBitmap(hScreenDC, width, height);
-    HGDIOBJ hOldBitmap = SelectObject(hMemDC, hBitmap);
-    
-    // 3. BitBlt the desktop
-    BitBlt(hMemDC, 0, 0, width, height, hScreenDC, DeskBounds->left, DeskBounds->top, SRCCOPY | CAPTUREBLT);
-    
-    // 4. Get the raw bits
-    BITMAPINFO bmi = {0};
-    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bmi.bmiHeader.biWidth = width;
-    bmi.bmiHeader.biHeight = -height; // Top-down
-    bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 32;
-    bmi.bmiHeader.biCompression = BI_RGB;
-    
-    std::vector<uint8_t> pixelData(width * height * 4);
-    GetDIBits(hMemDC, hBitmap, 0, height, pixelData.data(), &bmi, DIB_RGB_COLORS);
-    
-    // 5. Cleanup GDI objects
-    SelectObject(hMemDC, hOldBitmap);
-    DeleteObject(hBitmap);
-    DeleteDC(hMemDC);
-    ReleaseDC(NULL, hScreenDC);
-    
-    // 6. Update the Direct3D texture
-    // Data from GDI is BGRA (8 bits per channel), which matches DXGI_FORMAT_B8G8R8A8_UNORM
-    
-    // Explicitly acquire mutex 0 to update the shared resource with initial GDI data
-    hr = m_KeyMutex->AcquireSync(0, 1000);
-    if (SUCCEEDED(hr))
+    QImage initialImg;
+    if (DeskDuplGetCurrentScreen(&initialImg, true, nullptr, nullptr) == 0)
     {
-        m_DeviceContext->UpdateSubresource(m_SharedSurf, 0, NULL, pixelData.data(), width * 4, 0);
-        // Release mutex to 1 so the main loop (Consumer) can pick it up immediately
-        m_KeyMutex->ReleaseSync(1);
+        // Explicitly acquire mutex 0 to update the shared resource with initial data
+        hr = m_KeyMutex->AcquireSync(0, 1000);
+        if (SUCCEEDED(hr))
+        {
+            // Convert to ARGB32 if necessary to match the texture format
+            if (initialImg.format() != QImage::Format_ARGB32 && initialImg.format() != QImage::Format_RGB32) {
+                initialImg = initialImg.convertToFormat(QImage::Format_ARGB32);
+            }
+
+            m_DeviceContext->UpdateSubresource(m_SharedSurf, 0, NULL, initialImg.bits(), initialImg.width() * 4, 0);
+            // Release mutex to 1 so the main loop (Consumer) can pick it up immediately
+            m_KeyMutex->ReleaseSync(1);
+        }
     }
 
     return DUPL_RETURN_SUCCESS;
@@ -1190,6 +1166,16 @@ void OUTPUTMANAGER::SaveCurrentFrame(ID3D11Texture2D* sourceTexture, _In_ PTR_IN
     {
         QRect rect(m_DesktopRect.left, m_DesktopRect.top, m_DesktopRect.right - m_DesktopRect.left, m_DesktopRect.bottom - m_DesktopRect.top);
         QPoint mousePoint(PointerInfo->Position.x, PointerInfo->Position.y);
+        
+        // Update global image to reflect the latest DDA frame for application-wide consistency
+        // This ensures the current state is available to other parts of the system
+        {
+            std::lock_guard<std::mutex> lock(gp_mutexForLastScreenImage);
+            if (gp_screenImageFromDupl_p) {
+                *gp_screenImageFromDupl_p = image;
+            }
+        }
+
         m_FrameCallback(m_CallbackUserData, (const void*)&image, (const void*)&rect, (const void*)&mousePoint);
     }
 }
