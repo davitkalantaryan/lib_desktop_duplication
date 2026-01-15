@@ -5,8 +5,11 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#ifndef _THREADMANAGER_H_
-#define _THREADMANAGER_H_
+#pragma once
+
+#include <libdeskdupl/export_symbols.h>
+
+#ifdef LIBDESKDUPL_HAS_DDAPI
 
 #include "CommonTypes.h"
 
@@ -32,4 +35,4 @@ class THREADMANAGER
         _Field_size_(m_ThreadCount) THREAD_DATA* m_ThreadData;
 };
 
-#endif
+#endif  //  #ifdef LIBDESKDUPL_HAS_DDAPI

@@ -33,6 +33,20 @@ win32 {
 
 }
 
+# LIBDESKDUPL_DDAPI_NOT_NEEDED
+isEmpty(LIBDESKDUPL_DDAPI_NOT_NEEDED) {
+    LIBDESKDUPL_DDAPI_NOT_NEEDED = $$(LIBDESKDUPL_DDAPI_NOT_NEEDED)
+    isEmpty(LIBDESKDUPL_DDAPI_NOT_NEEDED) {
+        message("-- LIBDESKDUPL_DDAPI_NOT_NEEDED is not defined")
+    } else {
+        DEFINES += LIBDESKDUPL_DDAPI_NOT_NEEDED
+        message("++ LIBDESKDUPL_DDAPI_NOT_NEEDED is defined")
+    }
+} else {
+    DEFINES += LIBDESKDUPL_DDAPI_NOT_NEEDED
+    message("++ LIBDESKDUPL_DDAPI_NOT_NEEDED is defined")
+}
+
 
 OBJECTIVE_SOURCES += $$files($${libDeskDuplRepoRoot}/src/core/libdesktop_duplication/*.mm,true)
 

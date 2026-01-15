@@ -5,7 +5,11 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+
 #include "ThreadManager.h"
+
+#ifdef LIBDESKDUPL_HAS_DDAPI
+
 
 DWORD WINAPI DDProc(_In_ void* Param);
 
@@ -300,3 +304,6 @@ void THREADMANAGER::WaitForThreadTermination()
         WaitForMultipleObjectsEx(m_ThreadCount, m_ThreadHandles, TRUE, INFINITE, FALSE);
     }
 }
+
+
+#endif  //  #ifdef LIBDESKDUPL_HAS_DDAPI

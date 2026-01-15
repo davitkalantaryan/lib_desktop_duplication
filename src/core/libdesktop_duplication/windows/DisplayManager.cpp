@@ -5,8 +5,11 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#include <cinternal/internal_header.h>
+
 #include "DisplayManager.h"
+
+#ifdef LIBDESKDUPL_HAS_DDAPI
+
 using namespace DirectX;
 
 //
@@ -499,3 +502,5 @@ void DISPLAYMANAGER::CleanRefs()
         m_RTV = nullptr;
     }
 }
+
+#endif  //  #ifdef LIBDESKDUPL_HAS_DDAPI

@@ -26,9 +26,11 @@
 #endif
 
 
-#if defined(_WIN32)
+#if (!defined(LIBDESKDUPL_DDAPI_NOT_NEEDED)) && (!defined(LIBDESKDUPL_HAS_DDAPI))
+#if defined(_WIN32)  // here goes ors
 #define LIBDESKDUPL_HAS_DDAPI
 #endif  //  #if defined(_WIN32)
+#endif
 
 
 #endif  // #ifndef LIBDESKDUPL_INCLUDE_LIBDESKDUPL_EXPORT_SYMBOLS_H

@@ -7,6 +7,8 @@
 
 #include "DuplicationManager.h"
 
+#ifdef LIBDESKDUPL_HAS_DDAPI
+
 //
 // Constructor sets up references / variables
 //
@@ -317,3 +319,6 @@ void DUPLICATIONMANAGER::GetOutputDesc(_Out_ DXGI_OUTPUT_DESC* DescPtr)
 {
     *DescPtr = m_OutputDesc;
 }
+
+
+#endif  //  #ifdef LIBDESKDUPL_HAS_DDAPI

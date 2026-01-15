@@ -5,20 +5,27 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#ifndef _COMMONTYPES_H_
-#define _COMMONTYPES_H_
 
-#include <windows.h>
+#pragma once
+
+#include <libdeskdupl/export_symbols.h>
+
+#ifdef LIBDESKDUPL_HAS_DDAPI
+
+#include <cinternal/disable_compiler_warnings.h>
+#include <new>
+#include <mutex>
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#include <Windows.h>
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <sal.h>
-#include <new>
 #include <warning.h>
 #include <DirectXMath.h>
-#include <mutex>
-
 #include "PixelShader.h"
 #include "VertexShader.h"
+#include <cinternal/undisable_compiler_warnings.h>
 
 #define NUMVERTICES 6
 #define BPP         4
@@ -113,4 +120,5 @@ typedef struct _VERTEX
     DirectX::XMFLOAT2 TexCoord;
 } VERTEX;
 
-#endif
+
+#endif  //  #ifdef LIBDESKDUPL_HAS_DDAPI

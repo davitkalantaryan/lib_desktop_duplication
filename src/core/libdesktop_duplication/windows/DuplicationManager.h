@@ -5,8 +5,12 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#ifndef _DUPLICATIONMANAGER_H_
-#define _DUPLICATIONMANAGER_H_
+
+#pragma once
+
+#include <libdeskdupl/export_symbols.h>
+
+#ifdef LIBDESKDUPL_HAS_DDAPI
 
 #include "CommonTypes.h"
 
@@ -36,4 +40,4 @@ class DUPLICATIONMANAGER
         ID3D11Device* m_Device;
 };
 
-#endif
+#endif  //  #ifdef LIBDESKDUPL_HAS_DDAPI

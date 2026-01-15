@@ -1,14 +1,23 @@
-#include <limits.h>
-#include <string>
-#include <atomic>
-#include <windows.h>
-#include <process.h>
+
+
+#include <libdeskdupl/export_symbols.h>
+
+#ifdef LIBDESKDUPL_HAS_DDAPI
 
 #include <libdeskdupl/deskdupl.h>
 #include "DisplayManager.h"
 #include "DuplicationManager.h"
 #include "OutputManager.h"
 #include "ThreadManager.h"
+#include <cinternal/disable_compiler_warnings.h>
+#include <string>
+#include <atomic>
+#include <limits.h>
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#include <Windows.h>
+#include <process.h>
+#include <cinternal/undisable_compiler_warnings.h>
 
 // Internal Globals
 OUTPUTMANAGER OutMgr;
@@ -504,3 +513,6 @@ LIBDESKDUPL_EXPORT void DeskDuplUnregisterDesktopChangeCalbakc(void)
     ExpectedErrorEvent = nullptr;
     TerminateThreadsEvent = nullptr;
 }
+
+
+#endif  //  #ifdef LIBDESKDUPL_HAS_DDAPI

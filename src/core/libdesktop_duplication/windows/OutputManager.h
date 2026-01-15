@@ -5,18 +5,26 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-#ifndef _OUTPUTMANAGER_H_
-#define _OUTPUTMANAGER_H_
 
-#include <windows.h>
-#include <d3d11.h>
-#include <dxgi1_2.h>
+#pragma once
+
+#include <libdeskdupl/export_symbols.h>
+
+#ifdef LIBDESKDUPL_HAS_DDAPI
+
+#include <libdeskdupl/deskdupl.h>
+#include "CommonTypes.h"
+#include <cinternal/disable_compiler_warnings.h>
 #include <vector>
 #include <string>
 #include <memory>
-#include "CommonTypes.h"
-#include <libdeskdupl/deskdupl.h>
-#include "warning.h"
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#include <Windows.h>
+#include <d3d11.h>
+#include <dxgi1_2.h>
+#include <warning.h>
+#include <cinternal/undisable_compiler_warnings.h>
 
 //
 // Handles the task of desktop frame consumption and saving.
@@ -68,4 +76,4 @@ class OUTPUTMANAGER
         RECT m_DesktopRect;
 };
 
-#endif
+#endif  //  #ifdef LIBDESKDUPL_HAS_DDAPI

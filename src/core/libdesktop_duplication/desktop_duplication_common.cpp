@@ -17,6 +17,8 @@
 #include <thread>
 #include <qtutils/disable_utils_warnings.h>
 #include <QImage>
+#include <QRect>
+#include <QPoint>
 #include <QPixmap>
 #include <QCoreApplication>
 #include <QScreen>
@@ -93,15 +95,17 @@ static void MakeScreenshotsAndCallCallback(void)
 {
     if (s_clbk) {
         QImage img;
-        if(!DeskDuplGetCurrentScreen(&img,true,nullptr,nullptr)){
+        QRect screensRect;
+        QPoint mousePos;
+        if(!DeskDuplGetCurrentScreen(&img,true,&screensRect,&mousePos)){
 
             {  //  lock start
                 ::std::lock_guard<::std::mutex> aGuard(gp_mutexForLastScreenImage);
                 *gp_screenImageFromDupl_p = img;
             }  //  lock end
 
-            (*s_clbk)(s_userData, &img);
-        }  //  if(!DeskDuplGetCurrentScreen(&img,true,nullptr,nullptr)){
+            (*s_clbk)(s_userData, &img,&screensRect,&mousePos);
+        }  //  if(!DeskDuplGetCurrentScreen(&img,true,&screensRect,&mousePos)){
     }  //  if (s_clbk) {
 }
 

@@ -259,7 +259,6 @@ CPPUTILS_END_C
 #ifdef _WIN32
 
 
-
 #elif defined(Q_OS_MACOS)
 
 // Convert CGImageRef to QImage

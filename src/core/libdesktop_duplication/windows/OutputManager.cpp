@@ -5,17 +5,28 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+#include "OutputManager.h"
+
+#ifdef LIBDESKDUPL_HAS_DDAPI
+
+#include <cinternal/disable_compiler_warnings.h>
 #include <algorithm>
 #include <vector>
-using std::min;
-using std::max;
-#include "OutputManager.h"
+#include <qtutils/disable_utils_warnings.h>
 #include <QImage>
 #include <QString>
 #include <QDir>
 #include <d3d11_4.h>
+#include <cinternal/disable_compiler_warnings.h>
 
 
+using ::std::min;
+using ::std::max;
 using namespace DirectX;
 
 //
@@ -1182,3 +1193,6 @@ void OUTPUTMANAGER::SaveCurrentFrame(ID3D11Texture2D* sourceTexture, _In_ PTR_IN
         m_FrameCallback(m_CallbackUserData, (const void*)&image, (const void*)&rect, (const void*)&mousePoint);
     }
 }
+
+
+#endif  //  #ifdef LIBDESKDUPL_HAS_DDAPI
