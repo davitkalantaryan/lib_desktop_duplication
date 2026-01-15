@@ -6,11 +6,16 @@
 //
 
 #include <libdeskdupl/deskdupl.h>
-#include <QGuiApplication>
 #include <QString>
 #include <QImage>
 #include <QDir>
 #include <QFileInfo>
+#ifdef USE_QT_WIDGETS
+#include <QApplication>
+#include <QWidget>
+#else
+#include <QGuiApplication>
+#endif  //  #ifdef USE_QT_WIDGETS
 
 // Define a simple struct to hold our saving state if needed
 struct CallbackData {
@@ -38,7 +43,14 @@ void FrameCallback(void* userData, const void* a_img, const void* a_qtRect, cons
 
 int main(int a_argc, char* a_argv[])
 {
+
+#ifdef USE_QT_WIDGETS
+    QApplication app(a_argc, a_argv);
+    QWidget aWidg;
+    aWidg.show();
+#else
     QGuiApplication app(a_argc, a_argv);
+#endif  //  #ifdef USE_QT_WIDGETS
 
     // Prepare User Data
     CallbackData cbData;
