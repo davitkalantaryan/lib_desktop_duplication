@@ -24,15 +24,15 @@ OUTPUTMANAGER OutMgr;
 THREADMANAGER ThreadMgr;
 
 // Events
-HANDLE UnexpectedErrorEvent = nullptr;
-HANDLE ExpectedErrorEvent = nullptr;
-HANDLE TerminateThreadsEvent = nullptr;
-HANDLE WrapperThreadHandle = nullptr;
+static HANDLE s_UnexpectedErrorEvent = nullptr;
+static HANDLE s_ExpectedErrorEvent = nullptr;
+static HANDLE s_TerminateThreadsEvent = nullptr;
+static HANDLE s_WrapperThreadHandle = nullptr;
 
 //
 // Errors (Copied from DesktopDuplication.cpp)
 //
-HRESULT SystemTransitionsExpectedErrors[] = {
+HRESULT g_SystemTransitionsExpectedErrors[] = {
     DXGI_ERROR_DEVICE_REMOVED,
     DXGI_ERROR_ACCESS_LOST,
     static_cast<HRESULT>(WAIT_ABANDONED),
@@ -91,7 +91,7 @@ DWORD WINAPI DDProc(_In_ void* Param)
     HRESULT hr; hr = TData->DxRes.Device->OpenSharedResource(TData->TexSharedHandle, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&SharedSurf));
     if (FAILED (hr))
     {
-        Ret = ProcessFailure(TData->DxRes.Device, L"Opening shared texture failed", L"Error", hr, SystemTransitionsExpectedErrors);
+        Ret = ProcessFailure(TData->DxRes.Device, L"Opening shared texture failed", L"Error", hr, g_SystemTransitionsExpectedErrors);
         goto Exit;
     }
 
@@ -152,7 +152,7 @@ DWORD WINAPI DDProc(_In_ void* Param)
         else if (FAILED(hr))
         {
             // Generic unknown failure
-            Ret = ProcessFailure(TData->DxRes.Device, L"Unexpected error acquiring KeyMutex", L"Error", hr, SystemTransitionsExpectedErrors);
+            Ret = ProcessFailure(TData->DxRes.Device, L"Unexpected error acquiring KeyMutex", L"Error", hr, g_SystemTransitionsExpectedErrors);
             DuplMgr.DoneWithFrame();
             break;
         }
@@ -186,7 +186,7 @@ DWORD WINAPI DDProc(_In_ void* Param)
         hr = KeyMutex->ReleaseSync(1);
         if (FAILED(hr))
         {
-            Ret = ProcessFailure(TData->DxRes.Device, L"Unexpected error releasing the keyed mutex", L"Error", hr, SystemTransitionsExpectedErrors);
+            Ret = ProcessFailure(TData->DxRes.Device, L"Unexpected error releasing the keyed mutex", L"Error", hr, g_SystemTransitionsExpectedErrors);
             DuplMgr.DoneWithFrame();
             break;
         }
@@ -227,7 +227,7 @@ Exit:
 }
 
 // These are the errors we expect from IDXGIOutput1::DuplicateOutput due to a transition
-HRESULT CreateDuplicationExpectedErrors[] = {
+HRESULT g_CreateDuplicationExpectedErrors[] = {
     DXGI_ERROR_DEVICE_REMOVED,
     static_cast<HRESULT>(E_ACCESSDENIED),
     DXGI_ERROR_UNSUPPORTED,
@@ -236,14 +236,14 @@ HRESULT CreateDuplicationExpectedErrors[] = {
 };
 
 // These are the errors we expect from IDXGIOutputDuplication methods due to a transition
-HRESULT FrameInfoExpectedErrors[] = {
+HRESULT g_FrameInfoExpectedErrors[] = {
     DXGI_ERROR_DEVICE_REMOVED,
     DXGI_ERROR_ACCESS_LOST,
     S_OK
 };
 
 // These are the errors we expect from IDXGIAdapter::EnumOutputs methods due to outputs becoming stale during a transition
-HRESULT EnumOutputsExpectedErrors[] = {
+HRESULT g_EnumOutputsExpectedErrors[] = {
     DXGI_ERROR_NOT_FOUND,
     S_OK
 };
@@ -332,9 +332,9 @@ unsigned int __stdcall WrapperProc(void* data)
     }
 
     HANDLE WaitHandles[4] = {
-        TerminateThreadsEvent,
-        ExpectedErrorEvent,
-        UnexpectedErrorEvent,
+        s_TerminateThreadsEvent,
+        s_ExpectedErrorEvent,
+        s_UnexpectedErrorEvent,
         NewFrameEvent
     };
 
@@ -342,15 +342,15 @@ unsigned int __stdcall WrapperProc(void* data)
     {
         DUPL_RETURN Ret = DUPL_RETURN_SUCCESS;
 
-        if (FirstTime || WaitForSingleObjectEx(ExpectedErrorEvent, 0, FALSE) == WAIT_OBJECT_0)
+        if (FirstTime || WaitForSingleObjectEx(s_ExpectedErrorEvent, 0, FALSE) == WAIT_OBJECT_0)
         {
             if (!FirstTime)
             {
                 // Terminate other threads (monitor threads)
-                SetEvent(TerminateThreadsEvent);
+                SetEvent(s_TerminateThreadsEvent);
                 ThreadMgr.WaitForThreadTermination();
-                ResetEvent(TerminateThreadsEvent);
-                ResetEvent(ExpectedErrorEvent);
+                ResetEvent(s_TerminateThreadsEvent);
+                ResetEvent(s_ExpectedErrorEvent);
 
                 ThreadMgr.Clean();
                 OutMgr.CleanRefs();
@@ -368,7 +368,7 @@ unsigned int __stdcall WrapperProc(void* data)
                 if (SharedHandle)
                 {
                     // Pass events to ThreadManager so it can signal them
-                    Ret = ThreadMgr.Initialize(SingleOutput, OutputCount, UnexpectedErrorEvent, ExpectedErrorEvent, TerminateThreadsEvent, NewFrameEvent, SharedHandle, &DeskBounds);
+                    Ret = ThreadMgr.Initialize(SingleOutput, OutputCount, s_UnexpectedErrorEvent, s_ExpectedErrorEvent, s_TerminateThreadsEvent, NewFrameEvent, SharedHandle, &DeskBounds);
                 }
                 else
                 {
@@ -435,7 +435,7 @@ unsigned int __stdcall WrapperProc(void* data)
         {
             if (Ret == DUPL_RETURN_ERROR_EXPECTED)
             {
-                SetEvent(ExpectedErrorEvent);
+                SetEvent(s_ExpectedErrorEvent);
             }
             else
             {
@@ -459,18 +459,18 @@ unsigned int __stdcall WrapperProc(void* data)
 
 LIBDESKDUPL_EXPORT int DeskDuplRegisterAndStartDesktopChangeCalbakc(void* a_userData, TypeDesktopChange a_clbk)
 {
-    if (WrapperThreadHandle != nullptr)
+    if (s_WrapperThreadHandle != nullptr)
     {
         // Already registered/running
         return 0;
     }
 
     // Create Events
-    UnexpectedErrorEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
-    ExpectedErrorEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
-    TerminateThreadsEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+    s_UnexpectedErrorEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+    s_ExpectedErrorEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+    s_TerminateThreadsEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 
-    if (!UnexpectedErrorEvent || !ExpectedErrorEvent || !TerminateThreadsEvent)
+    if (!s_UnexpectedErrorEvent || !s_ExpectedErrorEvent || !s_TerminateThreadsEvent)
     {
         return -1;
     }
@@ -480,9 +480,9 @@ LIBDESKDUPL_EXPORT int DeskDuplRegisterAndStartDesktopChangeCalbakc(void* a_user
 
     // Start Wrapper Thread
     // We use _beginthreadex for C Runtime safety
-    WrapperThreadHandle = (HANDLE)_beginthreadex(nullptr, 0, WrapperProc, nullptr, 0, nullptr);
+    s_WrapperThreadHandle = (HANDLE)_beginthreadex(nullptr, 0, WrapperProc, nullptr, 0, nullptr);
 
-    if (!WrapperThreadHandle)
+    if (!s_WrapperThreadHandle)
     {
         return -1;
     }
@@ -492,26 +492,26 @@ LIBDESKDUPL_EXPORT int DeskDuplRegisterAndStartDesktopChangeCalbakc(void* a_user
 
 LIBDESKDUPL_EXPORT void DeskDuplUnregisterDesktopChangeCalbakc(void)
 {
-    if (WrapperThreadHandle)
+    if (s_WrapperThreadHandle)
     {
         // Signal termination
-        SetEvent(TerminateThreadsEvent);
-        SetEvent(UnexpectedErrorEvent); // Also signal this to break wait loops if any
+        SetEvent(s_TerminateThreadsEvent);
+        SetEvent(s_UnexpectedErrorEvent); // Also signal this to break wait loops if any
 
         // Wait for wrapper thread to exit
-        WaitForSingleObject(WrapperThreadHandle, INFINITE);
-        CloseHandle(WrapperThreadHandle);
-        WrapperThreadHandle = nullptr;
+        WaitForSingleObject(s_WrapperThreadHandle, INFINITE);
+        CloseHandle(s_WrapperThreadHandle);
+        s_WrapperThreadHandle = nullptr;
     }
 
     // Cleanup Events
-    if (UnexpectedErrorEvent) CloseHandle(UnexpectedErrorEvent);
-    if (ExpectedErrorEvent) CloseHandle(ExpectedErrorEvent);
-    if (TerminateThreadsEvent) CloseHandle(TerminateThreadsEvent);
+    if (s_UnexpectedErrorEvent) CloseHandle(s_UnexpectedErrorEvent);
+    if (s_ExpectedErrorEvent) CloseHandle(s_ExpectedErrorEvent);
+    if (s_TerminateThreadsEvent) CloseHandle(s_TerminateThreadsEvent);
 
-    UnexpectedErrorEvent = nullptr;
-    ExpectedErrorEvent = nullptr;
-    TerminateThreadsEvent = nullptr;
+    s_UnexpectedErrorEvent = nullptr;
+    s_ExpectedErrorEvent = nullptr;
+    s_TerminateThreadsEvent = nullptr;
 }
 
 

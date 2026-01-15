@@ -78,7 +78,7 @@ DUPL_RETURN DUPLICATIONMANAGER::InitDupl(_In_ ID3D11Device* Device, UINT Output)
     DxgiDevice = nullptr;
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to get parent DXGI Adapter", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to get parent DXGI Adapter", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Get output
@@ -88,7 +88,7 @@ DUPL_RETURN DUPLICATIONMANAGER::InitDupl(_In_ ID3D11Device* Device, UINT Output)
     DxgiAdapter = nullptr;
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to get specified output in DUPLICATIONMANAGER", L"Error", hr, EnumOutputsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to get specified output in DUPLICATIONMANAGER", L"Error", hr, g_EnumOutputsExpectedErrors);
     }
 
     DxgiOutput->GetDesc(&m_OutputDesc);
@@ -114,7 +114,7 @@ DUPL_RETURN DUPLICATIONMANAGER::InitDupl(_In_ ID3D11Device* Device, UINT Output)
             MessageBoxW(nullptr, L"There is already the maximum number of applications using the Desktop Duplication API running, please close one of those applications and then try again.", L"Error", MB_OK);
             return DUPL_RETURN_ERROR_UNEXPECTED;
         }
-        return ProcessFailure(m_Device, L"Failed to get duplicate output in DUPLICATIONMANAGER", L"Error", hr, CreateDuplicationExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to get duplicate output in DUPLICATIONMANAGER", L"Error", hr, g_CreateDuplicationExpectedErrors);
     }
 
     return DUPL_RETURN_SUCCESS;
@@ -190,7 +190,7 @@ DUPL_RETURN DUPLICATIONMANAGER::GetMouse(_Inout_ PTR_INFO* PtrInfo, _In_ DXGI_OU
         delete [] PtrInfo->PtrShapeBuffer;
         PtrInfo->PtrShapeBuffer = nullptr;
         PtrInfo->BufferSize = 0;
-        return ProcessFailure(m_Device, L"Failed to get frame pointer shape in DUPLICATIONMANAGER", L"Error", hr, FrameInfoExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to get frame pointer shape in DUPLICATIONMANAGER", L"Error", hr, g_FrameInfoExpectedErrors);
     }
 
     return DUPL_RETURN_SUCCESS;
@@ -217,7 +217,7 @@ DUPL_RETURN DUPLICATIONMANAGER::GetFrame(_Out_ FRAME_DATA* Data, _Out_ bool* Tim
 
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to acquire next frame in DUPLICATIONMANAGER", L"Error", hr, FrameInfoExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to acquire next frame in DUPLICATIONMANAGER", L"Error", hr, g_FrameInfoExpectedErrors);
     }
 
     // If still holding old frame, destroy it
@@ -266,7 +266,7 @@ DUPL_RETURN DUPLICATIONMANAGER::GetFrame(_Out_ FRAME_DATA* Data, _Out_ bool* Tim
         {
             Data->MoveCount = 0;
             Data->DirtyCount = 0;
-            return ProcessFailure(nullptr, L"Failed to get frame move rects in DUPLICATIONMANAGER", L"Error", hr, FrameInfoExpectedErrors);
+            return ProcessFailure(nullptr, L"Failed to get frame move rects in DUPLICATIONMANAGER", L"Error", hr, g_FrameInfoExpectedErrors);
         }
         Data->MoveCount = BufSize / sizeof(DXGI_OUTDUPL_MOVE_RECT);
 
@@ -279,7 +279,7 @@ DUPL_RETURN DUPLICATIONMANAGER::GetFrame(_Out_ FRAME_DATA* Data, _Out_ bool* Tim
         {
             Data->MoveCount = 0;
             Data->DirtyCount = 0;
-            return ProcessFailure(nullptr, L"Failed to get frame dirty rects in DUPLICATIONMANAGER", L"Error", hr, FrameInfoExpectedErrors);
+            return ProcessFailure(nullptr, L"Failed to get frame dirty rects in DUPLICATIONMANAGER", L"Error", hr, g_FrameInfoExpectedErrors);
         }
         Data->DirtyCount = BufSize / sizeof(RECT);
 
@@ -300,7 +300,7 @@ DUPL_RETURN DUPLICATIONMANAGER::DoneWithFrame()
     HRESULT hr = m_DeskDupl->ReleaseFrame();
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to release frame in DUPLICATIONMANAGER", L"Error", hr, FrameInfoExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to release frame in DUPLICATIONMANAGER", L"Error", hr, g_FrameInfoExpectedErrors);
     }
 
     if (m_AcquiredDesktopImage)

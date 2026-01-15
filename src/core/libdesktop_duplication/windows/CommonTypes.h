@@ -32,11 +32,10 @@
 
 #define OCCLUSION_STATUS_MSG WM_USER
 
-extern HRESULT SystemTransitionsExpectedErrors[];
-extern HRESULT CreateDuplicationExpectedErrors[];
-extern HRESULT FrameInfoExpectedErrors[];
-extern HRESULT AcquireFrameExpectedError[];
-extern HRESULT EnumOutputsExpectedErrors[];
+extern HRESULT g_SystemTransitionsExpectedErrors[];
+extern HRESULT g_CreateDuplicationExpectedErrors[];
+extern HRESULT g_FrameInfoExpectedErrors[];
+extern HRESULT g_EnumOutputsExpectedErrors[];
 
 typedef _Return_type_success_(return == DUPL_RETURN_SUCCESS) enum
 {

@@ -65,9 +65,9 @@ int main(int a_argc, char* a_argv[])
     }
 
     QImage instBuff;
-    if(!DeskDuplGetCurrentScreen(&instBuff,false,nullptr,nullptr)){
-        FrameCallback(&cbData,&instBuff,nullptr,nullptr);
-    }
+    //if(!DeskDuplGetCurrentScreen(&instBuff,false,nullptr,nullptr)){
+    //    FrameCallback(&cbData,&instBuff,nullptr,nullptr);
+    //}
 
     // Register Callbacks
     int result = DeskDuplRegisterAndStartDesktopChangeCalbakc(&cbData, FrameCallback);
@@ -77,9 +77,9 @@ int main(int a_argc, char* a_argv[])
         return 1;
     }
 
-    if(!DeskDuplGetCurrentScreen(&instBuff,false,nullptr,nullptr)){
-        FrameCallback(&cbData,&instBuff, nullptr, nullptr);
-    }
+    //if(!DeskDuplGetCurrentScreen(&instBuff,false,nullptr,nullptr)){
+    //    FrameCallback(&cbData,&instBuff, nullptr, nullptr);
+    //}
 
     QCoreApplication::exec();
 

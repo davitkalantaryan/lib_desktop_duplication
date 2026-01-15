@@ -204,7 +204,7 @@ DUPL_RETURN THREADMANAGER::InitializeDx(_Out_ DX_RESOURCES* Data)
     hr = Data->Device->CreateVertexShader(g_VS, Size, nullptr, &Data->VertexShader);
     if (FAILED(hr))
     {
-        return ProcessFailure(Data->Device, L"Failed to create vertex shader in InitializeDx", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(Data->Device, L"Failed to create vertex shader in InitializeDx", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Input layout
@@ -217,7 +217,7 @@ DUPL_RETURN THREADMANAGER::InitializeDx(_Out_ DX_RESOURCES* Data)
     hr = Data->Device->CreateInputLayout(Layout, NumElements, g_VS, Size, &Data->InputLayout);
     if (FAILED(hr))
     {
-        return ProcessFailure(Data->Device, L"Failed to create input layout in InitializeDx", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(Data->Device, L"Failed to create input layout in InitializeDx", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
     Data->Context->IASetInputLayout(Data->InputLayout);
 
@@ -226,7 +226,7 @@ DUPL_RETURN THREADMANAGER::InitializeDx(_Out_ DX_RESOURCES* Data)
     hr = Data->Device->CreatePixelShader(g_PS, Size, nullptr, &Data->PixelShader);
     if (FAILED(hr))
     {
-        return ProcessFailure(Data->Device, L"Failed to create pixel shader in InitializeDx", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(Data->Device, L"Failed to create pixel shader in InitializeDx", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Set up sampler
@@ -242,7 +242,7 @@ DUPL_RETURN THREADMANAGER::InitializeDx(_Out_ DX_RESOURCES* Data)
     hr = Data->Device->CreateSamplerState(&SampDesc, &Data->SamplerLinear);
     if (FAILED(hr))
     {
-        return ProcessFailure(Data->Device, L"Failed to create sampler state in InitializeDx", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(Data->Device, L"Failed to create sampler state in InitializeDx", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     return DUPL_RETURN_SUCCESS;

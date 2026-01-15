@@ -99,7 +99,7 @@ DUPL_RETURN OUTPUTMANAGER::InitOutput(INT SingleOutput, _Out_ UINT* OutCount, _O
     }
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Device creation in OUTPUTMANAGER failed", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Device creation in OUTPUTMANAGER failed", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Enable multithreaded mode for the context to handle access from multiple threads
@@ -124,7 +124,7 @@ DUPL_RETURN OUTPUTMANAGER::InitOutput(INT SingleOutput, _Out_ UINT* OutCount, _O
     DxgiDevice = nullptr;
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to get parent DXGI Adapter", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to get parent DXGI Adapter", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     hr = DxgiAdapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void**>(&m_Factory));
@@ -132,7 +132,7 @@ DUPL_RETURN OUTPUTMANAGER::InitOutput(INT SingleOutput, _Out_ UINT* OutCount, _O
     DxgiAdapter = nullptr;
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to get parent DXGI Factory", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to get parent DXGI Factory", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Create shared texture - We do this BEFORE output texture creation to get the bounds
@@ -163,7 +163,7 @@ DUPL_RETURN OUTPUTMANAGER::InitOutput(INT SingleOutput, _Out_ UINT* OutCount, _O
     hr = m_Device->CreateTexture2D(&OutputTexDesc, nullptr, &m_OutputTexture);
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to create output texture", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create output texture", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Make new render target view
@@ -189,7 +189,7 @@ DUPL_RETURN OUTPUTMANAGER::InitOutput(INT SingleOutput, _Out_ UINT* OutCount, _O
     hr = m_Device->CreateSamplerState(&SampDesc, &m_SamplerLinear);
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to create sampler state in OUTPUTMANAGER", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create sampler state in OUTPUTMANAGER", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Create the blend state
@@ -207,7 +207,7 @@ DUPL_RETURN OUTPUTMANAGER::InitOutput(INT SingleOutput, _Out_ UINT* OutCount, _O
     hr = m_Device->CreateBlendState(&BlendStateDesc, &m_BlendState);
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to create blend state in OUTPUTMANAGER", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create blend state in OUTPUTMANAGER", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Initialize shaders
@@ -246,7 +246,7 @@ DUPL_RETURN OUTPUTMANAGER::CreateSharedSurf(INT SingleOutput, _Out_ UINT* OutCou
     DxgiDevice = nullptr;
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to get parent DXGI Adapter", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to get parent DXGI Adapter", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Set initial values so that we always catch the right coordinates
@@ -341,11 +341,11 @@ DUPL_RETURN OUTPUTMANAGER::CreateSharedSurf(INT SingleOutput, _Out_ UINT* OutCou
             // guarantee that it can support a texture size of the desktop.
             // The sample only use this large texture to display the desktop image in a single window using DX
             // we could revert back to using GDI to update the window in this failure case.
-            return ProcessFailure(m_Device, L"Failed to create DirectX shared texture - we are attempting to create a texture the size of the complete desktop and this may be larger than the maximum texture size of your GPU.  Please try again using the -output command line parameter to duplicate only 1 monitor or configure your computer to a single monitor configuration", L"Error", hr, SystemTransitionsExpectedErrors);
+            return ProcessFailure(m_Device, L"Failed to create DirectX shared texture - we are attempting to create a texture the size of the complete desktop and this may be larger than the maximum texture size of your GPU.  Please try again using the -output command line parameter to duplicate only 1 monitor or configure your computer to a single monitor configuration", L"Error", hr, g_SystemTransitionsExpectedErrors);
         }
         else
         {
-            return ProcessFailure(m_Device, L"Failed to create shared texture", L"Error", hr, SystemTransitionsExpectedErrors);
+            return ProcessFailure(m_Device, L"Failed to create shared texture", L"Error", hr, g_SystemTransitionsExpectedErrors);
         }
     }
 
@@ -397,7 +397,7 @@ DUPL_RETURN OUTPUTMANAGER::ConsumeFrame(_In_ PTR_INFO* PointerInfo, _Out_ bool* 
     }
     else if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to acquire Keyed mutex in OUTPUTMANAGER", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to acquire Keyed mutex in OUTPUTMANAGER", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Got mutex, so draw
@@ -412,7 +412,7 @@ DUPL_RETURN OUTPUTMANAGER::ConsumeFrame(_In_ PTR_INFO* PointerInfo, _Out_ bool* 
     hr = m_KeyMutex->ReleaseSync(0);
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to Release Keyed mutex in OUTPUTMANAGER", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to Release Keyed mutex in OUTPUTMANAGER", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Save frame if all worked
@@ -486,7 +486,7 @@ DUPL_RETURN OUTPUTMANAGER::DrawFrame()
     hr = m_Device->CreateShaderResourceView(m_SharedSurf, &ShaderDesc, &ShaderResource);
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to create shader resource when drawing a frame", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create shader resource when drawing a frame", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Set resources
@@ -527,7 +527,7 @@ DUPL_RETURN OUTPUTMANAGER::DrawFrame()
     {
         ShaderResource->Release();
         ShaderResource = nullptr;
-        return ProcessFailure(m_Device, L"Failed to create vertex buffer when drawing a frame", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create vertex buffer when drawing a frame", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
     m_DeviceContext->IASetVertexBuffers(0, 1, &VertexBuffer, &Stride, &Offset);
 
@@ -617,7 +617,7 @@ DUPL_RETURN OUTPUTMANAGER::ProcessMonoMask(bool IsMono, _Inout_ PTR_INFO* PtrInf
     HRESULT hr = m_Device->CreateTexture2D(&CopyBufferDesc, nullptr, &CopyBuffer);
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed creating staging texture for pointer", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed creating staging texture for pointer", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Copy needed part of desktop image
@@ -634,7 +634,7 @@ DUPL_RETURN OUTPUTMANAGER::ProcessMonoMask(bool IsMono, _Inout_ PTR_INFO* PtrInf
     CopyBuffer = nullptr;
     if (FAILED(hr))
     {
-        return ProcessFailure(nullptr, L"Failed to QI staging texture into IDXGISurface for pointer", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(nullptr, L"Failed to QI staging texture into IDXGISurface for pointer", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Map pixels
@@ -644,7 +644,7 @@ DUPL_RETURN OUTPUTMANAGER::ProcessMonoMask(bool IsMono, _Inout_ PTR_INFO* PtrInf
     {
         CopySurface->Release();
         CopySurface = nullptr;
-        return ProcessFailure(m_Device, L"Failed to map surface for pointer", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to map surface for pointer", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // New mouseshape buffer
@@ -723,7 +723,7 @@ DUPL_RETURN OUTPUTMANAGER::ProcessMonoMask(bool IsMono, _Inout_ PTR_INFO* PtrInf
 CopySurface = nullptr;
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to unmap surface for pointer", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to unmap surface for pointer", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     return DUPL_RETURN_SUCCESS;
@@ -848,7 +848,7 @@ DUPL_RETURN OUTPUTMANAGER::DrawMouse(_In_ PTR_INFO* PtrInfo)
     HRESULT hr = m_Device->CreateTexture2D(&Desc, &InitData, &MouseTex);
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to create mouse pointer texture", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create mouse pointer texture", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Create shader resource from texture
@@ -857,7 +857,7 @@ DUPL_RETURN OUTPUTMANAGER::DrawMouse(_In_ PTR_INFO* PtrInfo)
     {
         MouseTex->Release();
         MouseTex = nullptr;
-        return ProcessFailure(m_Device, L"Failed to create shader resource from mouse pointer texture", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create shader resource from mouse pointer texture", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     D3D11_BUFFER_DESC BDesc;
@@ -878,7 +878,7 @@ DUPL_RETURN OUTPUTMANAGER::DrawMouse(_In_ PTR_INFO* PtrInfo)
         ShaderRes = nullptr;
         MouseTex->Release();
         MouseTex = nullptr;
-        return ProcessFailure(m_Device, L"Failed to create mouse pointer vertex buffer in OutputManager", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create mouse pointer vertex buffer in OutputManager", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Set resources
@@ -932,7 +932,7 @@ DUPL_RETURN OUTPUTMANAGER::InitShaders()
     hr = m_Device->CreateVertexShader(g_VS, Size, nullptr, &m_VertexShader);
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to create vertex shader in OUTPUTMANAGER", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create vertex shader in OUTPUTMANAGER", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     D3D11_INPUT_ELEMENT_DESC Layout[] =
@@ -944,7 +944,7 @@ DUPL_RETURN OUTPUTMANAGER::InitShaders()
     hr = m_Device->CreateInputLayout(Layout, NumElements, g_VS, Size, &m_InputLayout);
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to create input layout in OUTPUTMANAGER", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create input layout in OUTPUTMANAGER", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
     m_DeviceContext->IASetInputLayout(m_InputLayout);
 
@@ -952,7 +952,7 @@ DUPL_RETURN OUTPUTMANAGER::InitShaders()
     hr = m_Device->CreatePixelShader(g_PS, Size, nullptr, &m_PixelShader);
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to create pixel shader in OUTPUTMANAGER", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create pixel shader in OUTPUTMANAGER", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     return DUPL_RETURN_SUCCESS;
@@ -970,7 +970,7 @@ DUPL_RETURN OUTPUTMANAGER::MakeRTV()
     HRESULT hr = m_Device->CreateRenderTargetView(m_OutputTexture, nullptr, &m_RTV);
     if (FAILED(hr))
     {
-        return ProcessFailure(m_Device, L"Failed to create render target view in OUTPUTMANAGER", L"Error", hr, SystemTransitionsExpectedErrors);
+        return ProcessFailure(m_Device, L"Failed to create render target view in OUTPUTMANAGER", L"Error", hr, g_SystemTransitionsExpectedErrors);
     }
 
     // Set new render target
